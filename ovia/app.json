@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "TrackerApp",
+    "slug": "TrackerApp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F7F5FF"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#F7F5FF"
+      },
+      "package": "com.trackerapp.period"
+    },
+    "ios": {
+      "bundleIdentifier": "com.trackerapp.period"
+    }
+  }
+}
