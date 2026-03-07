@@ -13,9 +13,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+// ✅ Import shared user store from HomeScreen
+import { setUserName } from './HomeScreen';
+// ✅ Import shared email store from ProfileScreen
+import { setUserEmail } from './ProfileScreen';
+
 const { width, height } = Dimensions.get('window');
 
-// 🎨 Pink Color Palette
 const COLORS = {
   lavenderBlush: '#FFE5EC',
   pastelPink: '#FFB3C6',
@@ -55,7 +59,7 @@ export default function RegisterScreen({ navigation }) {
     if (!email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Enter a valid email address';
     if (!age.trim()) newErrors.age = 'Age is required';
-    else if (isNaN(age) || parseInt(age) < 10 || parseInt(age) > 60) newErrors.age = 'Enter a valid age (10-60)';
+    else if (isNaN(age) || parseInt(age) < 10 || parseInt(age) > 60) newErrors.age = 'Enter a valid age (10–60)';
     if (!password) newErrors.password = 'Password is required';
     else if (password.length < 6) newErrors.password = 'Password must be at least 6 characters';
     if (!confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
@@ -66,23 +70,38 @@ export default function RegisterScreen({ navigation }) {
 
   const handleRegister = () => {
     if (validate()) {
-      // navigation.replace('Home');
-      alert(`🌸 Welcome, ${fullName}! Account created successfully.`);
+      // ✅ Store user name + email so HomeScreen greeting and Profile show correct info
+      setUserName(fullName.trim());
+      setUserEmail(email.trim().toLowerCase());
+
+      // Navigate to Home and clear stack so back-button doesn't return to Register
+      navigation.replace('Home');
     }
   };
 
-  const renderInput = ({ label, value, onChangeText, placeholder, keyboardType = 'default', fieldKey, isPassword = false, showPass, toggleShow, icon }) => {
+  const renderInput = ({
+    label, value, onChangeText, placeholder,
+    keyboardType = 'default', fieldKey,
+    isPassword = false, showPass, toggleShow, icon,
+  }) => {
     const isFocused = focusedField === fieldKey;
     const hasError = !!errors[fieldKey];
     return (
       <View style={styles.inputGroup}>
         <Text style={styles.inputLabel}>{label}</Text>
-        <View style={[styles.inputWrapper, isFocused && styles.inputWrapperFocused, hasError && styles.inputWrapperError]}>
+        <View style={[
+          styles.inputWrapper,
+          isFocused && styles.inputWrapperFocused,
+          hasError && styles.inputWrapperError,
+        ]}>
           <Text style={styles.inputIcon}>{icon}</Text>
           <TextInput
             style={styles.input}
             value={value}
-            onChangeText={(text) => { onChangeText(text); if (errors[fieldKey]) setErrors({ ...errors, [fieldKey]: null }); }}
+            onChangeText={(text) => {
+              onChangeText(text);
+              if (errors[fieldKey]) setErrors({ ...errors, [fieldKey]: null });
+            }}
             placeholder={placeholder}
             placeholderTextColor={COLORS.pastelPink}
             keyboardType={keyboardType}
@@ -105,8 +124,11 @@ export default function RegisterScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           {/* Blobs */}
           <View style={styles.blobTopRight} />
           <View style={styles.blobBottomLeft} />
@@ -123,11 +145,32 @@ export default function RegisterScreen({ navigation }) {
           {/* Form */}
           <Animated.View style={[styles.form, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
 
-            {renderInput({ label: 'Full Name', value: fullName, onChangeText: setFullName, placeholder: 'Enter your full name', fieldKey: 'fullName', icon: '👤' })}
-            {renderInput({ label: 'Email Address', value: email, onChangeText: setEmail, placeholder: 'Enter your email', keyboardType: 'email-address', fieldKey: 'email', icon: '✉️' })}
-            {renderInput({ label: 'Age', value: age, onChangeText: setAge, placeholder: 'Enter your age', keyboardType: 'numeric', fieldKey: 'age', icon: '🎂' })}
-            {renderInput({ label: 'Password', value: password, onChangeText: setPassword, placeholder: 'Create a password', fieldKey: 'password', isPassword: true, showPass: showPassword, toggleShow: () => setShowPassword(!showPassword), icon: '🔒' })}
-            {renderInput({ label: 'Confirm Password', value: confirmPassword, onChangeText: setConfirmPassword, placeholder: 'Re-enter your password', fieldKey: 'confirmPassword', isPassword: true, showPass: showConfirmPassword, toggleShow: () => setShowConfirmPassword(!showConfirmPassword), icon: '🔒' })}
+            {renderInput({
+              label: 'Full Name', value: fullName, onChangeText: setFullName,
+              placeholder: 'Enter your full name', fieldKey: 'fullName', icon: '👤',
+            })}
+            {renderInput({
+              label: 'Email Address', value: email, onChangeText: setEmail,
+              placeholder: 'Enter your email', keyboardType: 'email-address',
+              fieldKey: 'email', icon: '✉️',
+            })}
+            {renderInput({
+              label: 'Age', value: age, onChangeText: setAge,
+              placeholder: 'Enter your age', keyboardType: 'numeric',
+              fieldKey: 'age', icon: '🎂',
+            })}
+            {renderInput({
+              label: 'Password', value: password, onChangeText: setPassword,
+              placeholder: 'Create a password', fieldKey: 'password',
+              isPassword: true, showPass: showPassword,
+              toggleShow: () => setShowPassword(!showPassword), icon: '🔒',
+            })}
+            {renderInput({
+              label: 'Confirm Password', value: confirmPassword, onChangeText: setConfirmPassword,
+              placeholder: 'Re-enter your password', fieldKey: 'confirmPassword',
+              isPassword: true, showPass: showConfirmPassword,
+              toggleShow: () => setShowConfirmPassword(!showConfirmPassword), icon: '🔒',
+            })}
 
             {/* Password strength */}
             {password.length > 0 && (
@@ -135,7 +178,9 @@ export default function RegisterScreen({ navigation }) {
                 <View style={[styles.strengthBar, { backgroundColor: password.length >= 6 ? COLORS.lightPink : COLORS.pastelPink }]} />
                 <View style={[styles.strengthBar, { backgroundColor: password.length >= 8 ? COLORS.watermelon : COLORS.pinkChampagne }]} />
                 <View style={[styles.strengthBar, { backgroundColor: password.length >= 10 ? COLORS.watermelon : COLORS.pinkChampagne }]} />
-                <Text style={styles.strengthText}>{password.length < 6 ? 'Weak' : password.length < 8 ? 'Fair' : 'Strong'}</Text>
+                <Text style={styles.strengthText}>
+                  {password.length < 6 ? 'Weak' : password.length < 8 ? 'Fair' : 'Strong'}
+                </Text>
               </View>
             )}
 
@@ -165,11 +210,8 @@ export default function RegisterScreen({ navigation }) {
               <Text style={styles.googleBtnText}>Continue with Google</Text>
             </TouchableOpacity>
 
-            {/* ✅ Login link — navigates to LoginScreen */}
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Login')}
-              style={styles.loginRow}
-            >
+            {/* Login link */}
+            <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.loginRow}>
               <Text style={styles.loginText}>Already have an account? </Text>
               <Text style={styles.loginLink}>Log In</Text>
             </TouchableOpacity>
