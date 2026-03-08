@@ -5,23 +5,53 @@ import {
   Modal, KeyboardAvoidingView, Platform, Alert, AppState,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// ── Vector Icon helper ──
+const Ico = ({ name, size = 20, color = '#E8748A' }) => (
+  <Ionicons name={name} size={size} color={color} />
+);
+
 import Svg, { Rect, Path, Line } from 'react-native-svg';
+// ── Bell SVG Icon ──
+const BellIcon = ({ color = '#E8748A', size = 22 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <Path d="M13.73 21a2 2 0 0 1-3.46 0" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink:    '#FFB3C6',
-  lightPink:     '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon:    '#FB6F92',
-  white:         '#FFFFFF',
-  darkText:      '#2D1B1E',
-  mutedText:     '#9B6B78',
-  navInactive:   '#A0A0B0',
-  tickGreen:     '#4CAF50',
-  crossRed:      '#F44336',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 // ─────────────────────────────────────────
@@ -35,11 +65,33 @@ const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
 const DAYS   = ['S','M','T','W','T','F','S'];
 
-const PERIOD_DAYS    = [1, 2, 3, 4, 5];
-const OVULATION_DAYS = [14, 15, 16];
-const FERTILE_DAYS   = [11, 12, 13, 14, 15, 16, 17];
+// ── Period prediction ──
+// Last period started on: March 1, 2026 (day 1 of current cycle)
+// Cycle length: 28 days, period lasts 5 days
+const LAST_PERIOD_START = new Date(2026, 2, 1); // March 1 2026
+const CYCLE_LENGTH      = 28;
+const PERIOD_DURATION   = 5;
 
-const TASK_ICONS = ['📋','🩸','💊','🧘','🏃','💧','🥗','😴','🩺','💆','🌿','⏰','🍵','🧴'];
+// Returns { prevStart, prevEnd, nextStart, nextEnd } as Date objects
+const getPeriodDates = () => {
+  const today = new Date();
+  // Walk forward from last period start to find the upcoming window
+  let start = new Date(LAST_PERIOD_START);
+  // Find the most recent past cycle start
+  while (start <= today) {
+    start = new Date(start.getTime() + CYCLE_LENGTH * 24 * 60 * 60 * 1000);
+  }
+  // `start` is now the next predicted period start
+  const nextStart = new Date(start);
+  const nextEnd   = new Date(start.getTime() + (PERIOD_DURATION - 1) * 24 * 60 * 60 * 1000);
+  const prevStart = new Date(start.getTime() - CYCLE_LENGTH * 24 * 60 * 60 * 1000);
+  const prevEnd   = new Date(prevStart.getTime() + (PERIOD_DURATION - 1) * 24 * 60 * 60 * 1000);
+  return { prevStart, prevEnd, nextStart, nextEnd };
+};
+
+const isBetween = (date, start, end) => date >= start && date <= end;
+
+const TASK_ICONS = ['list','water','medical','body','walk','water-outline','nutrition','moon','pulse','leaf','time','cafe','color-palette','heart'];
 const STORAGE_KEY = 'OVIA_TASKS_V2';
 
 // ─────────────────────────────────────────
@@ -122,7 +174,7 @@ export default function CalendarScreen({ navigation }) {
   const [newTitle,     setNewTitle]     = useState('');
   const [newSub,       setNewSub]       = useState('');
   const [newTime,      setNewTime]      = useState('');
-  const [newIcon,      setNewIcon]      = useState('📋');
+  const [newIcon,      setNewIcon]      = useState('list');
   const modalAnim = useRef(new Animated.Value(0)).current;
 
   const fadeAnim  = useRef(new Animated.Value(0)).current;
@@ -223,7 +275,7 @@ export default function CalendarScreen({ navigation }) {
 
   // ── Add Task modal ──
   const openModal = () => {
-    setNewTitle(''); setNewSub(''); setNewTime(''); setNewIcon('📋');
+    setNewTitle(''); setNewSub(''); setNewTime(''); setNewIcon('list');
     setModalVisible(true);
     Animated.spring(modalAnim, { toValue: 1, useNativeDriver: true, tension: 65, friction: 10 }).start();
   };
@@ -279,23 +331,25 @@ export default function CalendarScreen({ navigation }) {
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
-  // ── Day circle styling ──
+  // ── Period dates (computed once per render) ──
+  const { prevStart, prevEnd, nextStart, nextEnd } = getPeriodDates();
+
+  // ── Day circle styling — only highlight prev/next period ──
   const getDayStyle = (day) => {
     const d = new Date(currentYear, currentMonth, day);
     const k = toKey(d);
     if (k === selectedKey) return styles.daySelected;
-    if (k === todayKey) return styles.dayToday;
-    if (PERIOD_DAYS.includes(day)    && currentMonth === today.getMonth()) return styles.dayPeriod;
-    if (OVULATION_DAYS.includes(day) && currentMonth === today.getMonth()) return styles.dayOvulation;
-    if (FERTILE_DAYS.includes(day)   && currentMonth === today.getMonth()) return styles.dayFertile;
+    if (k === todayKey)    return styles.dayToday;
+    if (isBetween(d, nextStart, nextEnd)) return styles.dayNextPeriod;
+    if (isBetween(d, prevStart, prevEnd)) return styles.dayPrevPeriod;
     return null;
   };
   const getDayTextStyle = (day) => {
     const d = new Date(currentYear, currentMonth, day);
     const k = toKey(d);
     if (k === selectedKey || k === todayKey) return styles.dayTextSelected;
-    if (PERIOD_DAYS.includes(day)    && currentMonth === today.getMonth()) return styles.dayTextPeriod;
-    if (OVULATION_DAYS.includes(day) && currentMonth === today.getMonth()) return styles.dayTextOvulation;
+    if (isBetween(d, nextStart, nextEnd))    return styles.dayTextNextPeriod;
+    if (isBetween(d, prevStart, prevEnd))    return styles.dayTextPrevPeriod;
     return null;
   };
 
@@ -315,7 +369,7 @@ export default function CalendarScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg || '#FDF0F3'} />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -328,7 +382,7 @@ export default function CalendarScreen({ navigation }) {
           {MONTHS[currentMonth]} {currentYear} Calendar
         </Text>
         <TouchableOpacity style={styles.bellBtn} onPress={() => navigation.navigate('Notifications')}>
-          <Text style={{ fontSize: 20 }}>🔔</Text>
+          <BellIcon color='#E8748A' size={22} />
           <View style={styles.bellDot} />
         </TouchableOpacity>
       </View>
@@ -368,16 +422,12 @@ export default function CalendarScreen({ navigation }) {
                     <View style={[styles.dayCircle, getDayStyle(day)]}>
                       <Text style={[styles.dayText, getDayTextStyle(day)]}>{day}</Text>
                     </View>
-                    {/* Task indicator dots */}
+                    {/* Task indicator dots only */}
                     {dayAllDone(day)
-                      ? <View style={[styles.dayDot, { backgroundColor: COLORS.tickGreen }]} />
+                      ? <View style={[styles.dayDot, { backgroundColor: '#5BBF87' }]} />
                       : dayHasTasks(day)
-                        ? <View style={[styles.dayDot, { backgroundColor: COLORS.watermelon }]} />
-                        : PERIOD_DAYS.includes(day) && currentMonth === today.getMonth()
-                          ? <View style={[styles.dayDot, { backgroundColor: COLORS.watermelon, opacity: 0.4 }]} />
-                          : OVULATION_DAYS.includes(day) && currentMonth === today.getMonth()
-                            ? <View style={[styles.dayDot, { backgroundColor: COLORS.lightPink }]} />
-                            : <View style={styles.dayDotEmpty} />
+                        ? <View style={[styles.dayDot, { backgroundColor: '#E8748A' }]} />
+                        : <View style={styles.dayDotEmpty} />
                     }
                   </>
                 ) : (
@@ -390,10 +440,10 @@ export default function CalendarScreen({ navigation }) {
           {/* Legend */}
           <View style={styles.legend}>
             {[
-              { color: COLORS.watermelon, label: 'Period' },
-              { color: COLORS.lightPink,  label: 'Ovulation' },
-              { color: COLORS.tickGreen,  label: 'All done' },
-              { color: COLORS.pastelPink, label: 'Today' },
+              { color: '#E8748A',    label: 'Period' },
+              { color: COLORS.pinkChampagne, label: 'Past Period' },
+              { color: '#5BBF87',     label: 'All done' },
+              { color: COLORS.pastelPink,    label: 'Today' },
             ].map((l, i) => (
               <View key={i} style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: l.color }]} />
@@ -418,14 +468,14 @@ export default function CalendarScreen({ navigation }) {
                     styles.viewingBadgeText,
                     isToday ? styles.viewingBadgeTextToday : styles.viewingBadgeTextPast
                   ]}>
-                    {isToday ? '📅 Today' : `📂 ${formattedSelected}`}
+                    {isToday ? 'Today' : formattedSelected}
                   </Text>
                 </View>
               </View>
               {dayTasks.length > 0 && (
                 <Text style={styles.taskSubtitle}>
-                  <Text style={{ color: COLORS.tickGreen }}>{doneCount} done</Text>
-                  {skipCount > 0 && <Text style={{ color: COLORS.crossRed }}> · {skipCount} skipped</Text>}
+                  <Text style={{ color: '#5BBF87' }}>{doneCount} done</Text>
+                  {skipCount > 0 && <Text style={{ color: '#F44336' }}> · {skipCount} skipped</Text>}
                   {pendingCount > 0 && <Text style={{ color: COLORS.mutedText }}> · {pendingCount} pending</Text>}
                 </Text>
               )}
@@ -447,7 +497,7 @@ export default function CalendarScreen({ navigation }) {
           {/* ── PAST DAY: read-only banner ── */}
           {!isToday && (
             <View style={styles.pastBanner}>
-              <Text style={styles.pastBannerIcon}>📂</Text>
+              <Ico name="folder-open" size={16} color={COLORS.watermelon} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.pastBannerTitle}>Viewing past tasks</Text>
                 <Text style={styles.pastBannerSub}>
@@ -473,7 +523,7 @@ export default function CalendarScreen({ navigation }) {
           {/* ── TODAY: empty state ── */}
           {isToday && dayTasks.length === 0 && (
             <View style={styles.emptyToday}>
-              <Text style={styles.emptyTodayEmoji}>✨</Text>
+              <Ico name="sparkles" size={44} color={COLORS.pastelPink} />
               <Text style={styles.emptyTodayTitle}>Fresh start!</Text>
               <Text style={styles.emptyTodaySub}>
                 Your task list resets every day at midnight.{'\n'}Tap "+ Add Task" to plan your day.
@@ -504,9 +554,7 @@ export default function CalendarScreen({ navigation }) {
                 <View style={[styles.taskIconBadge, {
                   backgroundColor: isDone ? COLORS.tickGreen + '22' : isSkip ? COLORS.crossRed + '15' : task.color + '18'
                 }]}>
-                  <Text style={[styles.taskIcon, (isDone || isSkip) && { opacity: 0.55 }]}>
-                    {task.icon}
-                  </Text>
+                  <Ico name={task.icon || "list"} size={20} color={(isDone || isSkip) ? COLORS.mutedText : COLORS.watermelon} />
                 </View>
 
                 {/* Info */}
@@ -531,7 +579,7 @@ export default function CalendarScreen({ navigation }) {
                   </Text>
                 </View>
 
-                {/* ✓ Tick — only editable on today */}
+                {/* ✓ / ✗ / 🗑 — only editable on today */}
                 {isToday ? (
                   <>
                     <TouchableOpacity
@@ -539,28 +587,35 @@ export default function CalendarScreen({ navigation }) {
                       onPress={() => setTaskStatus(task.id, 'done')}
                       activeOpacity={0.75}
                     >
-                      <Text style={[styles.actionBtnIcon, isDone && { color: COLORS.white }]}>✓</Text>
+                      <Ico name="checkmark" size={16} color={isDone ? COLORS.white : COLORS.watermelon} />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.actionBtn, isSkip ? styles.actionBtnSkipActive : styles.actionBtnSkip]}
                       onPress={() => setTaskStatus(task.id, 'skip')}
                       activeOpacity={0.75}
                     >
-                      <Text style={[styles.actionBtnIcon, isSkip && { color: COLORS.white }]}>✗</Text>
+                      <Ico name="close" size={16} color={isSkip ? COLORS.white : COLORS.mutedText} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.actionBtnDelete}
+                      onPress={() => deleteTask(task.id)}
+                      activeOpacity={0.75}
+                    >
+                      <Ico name="trash-outline" size={15} color={COLORS.crossRed} />
                     </TouchableOpacity>
                   </>
                 ) : (
                   /* Past day: show status chip only */
                   <View style={[
                     styles.statusChip,
-                    isDone && { backgroundColor: COLORS.tickGreen + '20' },
-                    isSkip && { backgroundColor: COLORS.crossRed + '15' },
-                    !isDone && !isSkip && { backgroundColor: COLORS.pinkChampagne },
+                    isDone && { backgroundColor: '#5BBF87' + '20' },
+                    isSkip && { backgroundColor: '#F44336' + '15' },
+                    !isDone && !isSkip && { backgroundColor: '#FAD4DC' },
                   ]}>
                     <Text style={[
                       styles.statusChipText,
-                      isDone && { color: COLORS.tickGreen },
-                      isSkip && { color: COLORS.crossRed },
+                      isDone && { color: '#5BBF87' },
+                      isSkip && { color: '#F44336' },
                     ]}>
                       {isDone ? '✓' : isSkip ? '✗' : '—'}
                     </Text>
@@ -574,11 +629,11 @@ export default function CalendarScreen({ navigation }) {
           {!isToday && dayTasks.length > 0 && (
             <View style={styles.pastSummary}>
               <View style={styles.pastSummaryItem}>
-                <View style={[styles.pastSummaryDot, { backgroundColor: COLORS.tickGreen }]} />
+                <View style={[styles.pastSummaryDot, { backgroundColor: '#5BBF87' }]} />
                 <Text style={styles.pastSummaryText}>{doneCount} completed</Text>
               </View>
               <View style={styles.pastSummaryItem}>
-                <View style={[styles.pastSummaryDot, { backgroundColor: COLORS.crossRed }]} />
+                <View style={[styles.pastSummaryDot, { backgroundColor: '#F44336' }]} />
                 <Text style={styles.pastSummaryText}>{skipCount} skipped</Text>
               </View>
               <View style={styles.pastSummaryItem}>
@@ -625,7 +680,7 @@ export default function CalendarScreen({ navigation }) {
           ]}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Add New Task</Text>
-            <Text style={styles.modalDateLabel}>📅 Today — {formattedSelected}</Text>
+            <View style={{flexDirection:"row",alignItems:"center",gap:6}}><Ico name="calendar" size={14} color={COLORS.mutedText}/><Text style={styles.modalDateLabel}>Today — {formattedSelected}</Text></View>
 
             {/* Icon picker */}
             <Text style={styles.modalLabel}>Choose Icon</Text>
@@ -636,7 +691,7 @@ export default function CalendarScreen({ navigation }) {
                   style={[styles.iconChip, newIcon === ic && styles.iconChipActive]}
                   onPress={() => setNewIcon(ic)}
                 >
-                  <Text style={{ fontSize: 20 }}>{ic}</Text>
+                  <Ico name={ic} size={20} color={newIcon === ic ? COLORS.watermelon : COLORS.mutedText} />
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -680,7 +735,7 @@ export default function CalendarScreen({ navigation }) {
             {/* Live preview */}
             {newTitle.trim().length > 0 && (
               <View style={styles.taskPreview}>
-                <Text style={{ fontSize: 22 }}>{newIcon}</Text>
+                <Ico name={newIcon} size={28} color={COLORS.watermelon} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.taskPreviewTitle}>{newTitle}</Text>
                   {newSub ? <Text style={styles.taskPreviewSub}>{newSub}</Text> : null}
@@ -710,21 +765,21 @@ export default function CalendarScreen({ navigation }) {
 const DAY_SIZE = (width - 40 - 24) / 7;
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
+  safeArea: { flex: 1, backgroundColor: COLORS.bg || '#FDF0F3' },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
 
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14 },
   menuBtn: { gap: 4, padding: 4 },
   menuLine: { width: 22, height: 2.5, backgroundColor: COLORS.darkText, borderRadius: 2 },
   headerTitle: { fontSize: 13, fontWeight: '700', color: COLORS.darkText, flex: 1, textAlign: 'center', marginHorizontal: 8 },
-  bellBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: COLORS.pinkChampagne },
-  bellDot: { position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: 3.5, backgroundColor: COLORS.watermelon, borderWidth: 1, borderColor: COLORS.white },
+  bellBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#FAD4DC' },
+  bellDot: { position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#E8748A', borderWidth: 1, borderColor: COLORS.white },
 
   // Calendar
-  calendarCard: { backgroundColor: COLORS.white, borderRadius: 24, padding: 18, marginBottom: 20, borderWidth: 1.5, borderColor: COLORS.pastelPink, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 4 },
+  calendarCard: { backgroundColor: COLORS.white, borderRadius: 24, padding: 18, marginBottom: 20, borderWidth: 1.5, borderColor: '#F5A8B8', shadowColor: '#D06070', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 4 },
   monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  monthArrowBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.lavenderBlush, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: COLORS.pinkChampagne },
-  monthArrow: { fontSize: 20, color: COLORS.watermelon, fontWeight: '700', lineHeight: 24 },
+  monthArrowBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FDE8ED', alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#FAD4DC' },
+  monthArrow: { fontSize: 20, color: '#E8748A', fontWeight: '700', lineHeight: 24 },
   monthTitle: { fontSize: 16, fontWeight: '800', color: COLORS.darkText },
   dayHeaderRow: { flexDirection: 'row', marginBottom: 8 },
   dayHeader: { width: DAY_SIZE, textAlign: 'center', fontSize: 12, fontWeight: '700', color: COLORS.mutedText },
@@ -733,14 +788,15 @@ const styles = StyleSheet.create({
   dayCell: { width: DAY_SIZE, alignItems: 'center', marginBottom: 4 },
   dayCircle: { width: DAY_SIZE - 4, height: DAY_SIZE - 4, borderRadius: (DAY_SIZE - 4) / 2, alignItems: 'center', justifyContent: 'center' },
   dayText: { fontSize: 13, fontWeight: '500', color: COLORS.darkText },
-  daySelected: { backgroundColor: COLORS.watermelon, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.4, shadowRadius: 6, elevation: 4 },
-  dayToday: { backgroundColor: COLORS.pinkChampagne, borderWidth: 2, borderColor: COLORS.watermelon },
+  daySelected: { backgroundColor: '#E8748A', shadowColor: '#D06070', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.4, shadowRadius: 6, elevation: 4 },
+  dayToday: { backgroundColor: '#FAD4DC', borderWidth: 2, borderColor: '#E8748A' },
   dayTextSelected: { color: COLORS.white, fontWeight: '800' },
-  dayPeriod: { backgroundColor: '#FFE5EC', borderWidth: 1.5, borderColor: COLORS.watermelon },
-  dayTextPeriod: { color: COLORS.watermelon, fontWeight: '700' },
-  dayOvulation: { backgroundColor: COLORS.lightPink },
-  dayTextOvulation: { color: COLORS.white, fontWeight: '700' },
-  dayFertile: { backgroundColor: COLORS.lavenderBlush },
+  // Next predicted period — solid watermelon ring
+  dayNextPeriod: { backgroundColor: '#FDE8ED', borderWidth: 2, borderColor: '#E8748A' },
+  dayTextNextPeriod: { color: '#E8748A', fontWeight: '800' },
+  // Previous period — soft muted ring
+  dayPrevPeriod: { backgroundColor: '#FDE8ED', borderWidth: 1.5, borderColor: '#FAD4DC' },
+  dayTextPrevPeriod: { color: COLORS.mutedText, fontWeight: '600' },
   dayDot: { width: 5, height: 5, borderRadius: 2.5, marginTop: 2 },
   dayDotEmpty: { width: 5, height: 5, marginTop: 2 },
   legend: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: COLORS.lavenderBlush },
@@ -754,23 +810,23 @@ const styles = StyleSheet.create({
   taskTitleInner: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 3 },
   taskTitle: { fontSize: 17, fontWeight: '800', color: COLORS.darkText },
   viewingBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
-  viewingBadgeToday: { backgroundColor: COLORS.watermelon },
-  viewingBadgePast: { backgroundColor: COLORS.pinkChampagne },
+  viewingBadgeToday: { backgroundColor: '#E8748A' },
+  viewingBadgePast: { backgroundColor: '#FAD4DC' },
   viewingBadgeText: { fontSize: 10, fontWeight: '700' },
   viewingBadgeTextToday: { color: COLORS.white },
   viewingBadgeTextPast: { color: COLORS.mutedText },
   taskSubtitle: { fontSize: 11, color: COLORS.mutedText, marginTop: 2 },
-  progressPill: { backgroundColor: COLORS.watermelon, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5 },
+  progressPill: { backgroundColor: '#E8748A', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5 },
   progressPillText: { color: COLORS.white, fontSize: 12, fontWeight: '800' },
-  progressTrack: { height: 5, backgroundColor: COLORS.pinkChampagne, borderRadius: 3, marginBottom: 14, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: COLORS.tickGreen, borderRadius: 3 },
+  progressTrack: { height: 5, backgroundColor: '#FAD4DC', borderRadius: 3, marginBottom: 14, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: '#5BBF87', borderRadius: 3 },
 
   // Past banner
-  pastBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: COLORS.white, borderRadius: 16, padding: 14, marginBottom: 14, borderWidth: 1.5, borderColor: COLORS.pinkChampagne },
+  pastBanner: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: COLORS.white, borderRadius: 16, padding: 14, marginBottom: 14, borderWidth: 1.5, borderColor: '#FAD4DC' },
   pastBannerIcon: { fontSize: 22 },
   pastBannerTitle: { fontSize: 13, fontWeight: '700', color: COLORS.darkText, marginBottom: 2 },
   pastBannerSub: { fontSize: 11, color: COLORS.mutedText },
-  goTodayBtn: { backgroundColor: COLORS.watermelon, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 7 },
+  goTodayBtn: { backgroundColor: '#E8748A', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 7 },
   goTodayBtnText: { color: COLORS.white, fontSize: 11, fontWeight: '700' },
 
   // Today empty
@@ -780,7 +836,7 @@ const styles = StyleSheet.create({
   emptyTodaySub: { fontSize: 13, color: COLORS.mutedText, textAlign: 'center', lineHeight: 20 },
 
   // Task card
-  taskCard: { flexDirection: 'row', alignItems: 'center', borderRadius: 18, padding: 14, marginBottom: 10, borderWidth: 1.5, borderColor: COLORS.pastelPink, shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 6, elevation: 2, overflow: 'hidden', position: 'relative' },
+  taskCard: { flexDirection: 'row', alignItems: 'center', borderRadius: 18, padding: 14, marginBottom: 10, borderWidth: 1.5, borderColor: '#F5A8B8', shadowColor: '#D8808E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 6, elevation: 2, overflow: 'hidden', position: 'relative' },
   taskCardDone: { borderColor: COLORS.tickGreen + '50', backgroundColor: '#F1FBF1' },
   taskCardSkip: { borderColor: COLORS.crossRed + '35', backgroundColor: '#FFF5F5', opacity: 0.8 },
   taskAccent: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 4 },
@@ -789,28 +845,29 @@ const styles = StyleSheet.create({
   taskInfo: { flex: 1, marginRight: 6 },
   taskItemTitle: { fontSize: 14, fontWeight: '700', color: COLORS.darkText, marginBottom: 2 },
   taskTitleDone: { textDecorationLine: 'line-through', color: COLORS.mutedText, fontWeight: '500' },
-  taskTitleSkip: { textDecorationLine: 'line-through', color: COLORS.crossRed, fontWeight: '500', opacity: 0.7 },
+  taskTitleSkip: { textDecorationLine: 'line-through', color: '#F44336', fontWeight: '500', opacity: 0.7 },
   taskItemSub: { fontSize: 11, color: COLORS.mutedText, marginBottom: 3 },
   taskTime: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3 },
 
   actionBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', marginLeft: 5, borderWidth: 2 },
   actionBtnDone:       { borderColor: COLORS.tickGreen, backgroundColor: COLORS.white },
-  actionBtnDoneActive: { borderColor: COLORS.tickGreen, backgroundColor: COLORS.tickGreen },
+  actionBtnDoneActive: { borderColor: COLORS.tickGreen, backgroundColor: '#5BBF87' },
   actionBtnSkip:       { borderColor: COLORS.crossRed,  backgroundColor: COLORS.white },
-  actionBtnSkipActive: { borderColor: COLORS.crossRed,  backgroundColor: COLORS.crossRed },
+  actionBtnSkipActive: { borderColor: COLORS.crossRed,  backgroundColor: '#F44336' },
+  actionBtnDelete: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginLeft: 4, backgroundColor: '#FFF0F0', borderWidth: 1.5, borderColor: COLORS.crossRed + '60' },
   actionBtnIcon: { fontSize: 14, fontWeight: '800', color: COLORS.mutedText },
 
   statusChip: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6, marginLeft: 6 },
   statusChipText: { fontSize: 13, fontWeight: '800', color: COLORS.mutedText },
 
   // Past summary footer
-  pastSummary: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: COLORS.white, borderRadius: 16, padding: 14, borderWidth: 1.5, borderColor: COLORS.pinkChampagne, marginTop: 4 },
+  pastSummary: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: COLORS.white, borderRadius: 16, padding: 14, borderWidth: 1.5, borderColor: '#FAD4DC', marginTop: 4 },
   pastSummaryItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   pastSummaryDot: { width: 8, height: 8, borderRadius: 4 },
   pastSummaryText: { fontSize: 12, color: COLORS.darkText, fontWeight: '600' },
 
   // FAB
-  fab: { position: 'absolute', bottom: 118, right: 20, backgroundColor: COLORS.watermelon, borderRadius: 28, paddingHorizontal: 20, paddingVertical: 14, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 10, zIndex: 100 },
+  fab: { position: 'absolute', bottom: 118, right: 20, backgroundColor: '#E8748A', borderRadius: 28, paddingHorizontal: 20, paddingVertical: 14, shadowColor: '#D06070', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 10, zIndex: 100 },
   fabText: { color: COLORS.white, fontSize: 14, fontWeight: '700' },
 
   // Bottom nav
@@ -844,7 +901,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 3,
     borderRadius: 2,
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
   },
   navActiveCircle: {
     position: 'absolute',
@@ -852,7 +909,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.lavenderBlush,
+    backgroundColor: COLORS.roseCircle || '#FADADF',
     zIndex: -1,
   },
   navLabel: {
@@ -862,26 +919,26 @@ const styles = StyleSheet.create({
     marginTop: 1,
     letterSpacing: 0.2,
   },
-  navLabelActive: { color: COLORS.watermelon, fontWeight: '700' },
+  navLabelActive: { color: '#E8748A', fontWeight: '700' },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.38)' },
   modalSheet: { backgroundColor: COLORS.white, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 36, shadowColor: '#000', shadowOffset: { width: 0, height: -6 }, shadowOpacity: 0.12, shadowRadius: 20, elevation: 20 },
-  modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: COLORS.pinkChampagne, alignSelf: 'center', marginBottom: 18 },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: '#FAD4DC', alignSelf: 'center', marginBottom: 18 },
   modalTitle: { fontSize: 20, fontWeight: '800', color: COLORS.darkText, marginBottom: 2 },
-  modalDateLabel: { fontSize: 12, color: COLORS.watermelon, fontWeight: '700', marginBottom: 18 },
+  modalDateLabel: { fontSize: 12, color: '#E8748A', fontWeight: '700', marginBottom: 18 },
   modalLabel: { fontSize: 12, fontWeight: '700', color: COLORS.darkText, marginBottom: 6, marginTop: 4 },
-  iconChip: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.lavenderBlush, alignItems: 'center', justifyContent: 'center', marginRight: 8, borderWidth: 2, borderColor: 'transparent' },
-  iconChipActive: { borderColor: COLORS.watermelon, backgroundColor: COLORS.pinkChampagne },
-  modalInputWrapper: { backgroundColor: COLORS.lavenderBlush, borderRadius: 14, borderWidth: 1.5, borderColor: COLORS.pastelPink, paddingHorizontal: 14, paddingVertical: 2, marginBottom: 10 },
+  iconChip: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#FDE8ED', alignItems: 'center', justifyContent: 'center', marginRight: 8, borderWidth: 2, borderColor: 'transparent' },
+  iconChipActive: { borderColor: '#E8748A', backgroundColor: '#FAD4DC' },
+  modalInputWrapper: { backgroundColor: '#FDE8ED', borderRadius: 14, borderWidth: 1.5, borderColor: '#F5A8B8', paddingHorizontal: 14, paddingVertical: 2, marginBottom: 10 },
   modalInput: { fontSize: 14, color: COLORS.darkText, paddingVertical: 10 },
-  taskPreview: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.lavenderBlush, borderRadius: 14, padding: 12, marginVertical: 10, borderWidth: 1.5, borderColor: COLORS.pastelPink, gap: 10 },
+  taskPreview: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FDE8ED', borderRadius: 14, padding: 12, marginVertical: 10, borderWidth: 1.5, borderColor: '#F5A8B8', gap: 10 },
   taskPreviewTitle: { fontSize: 13, fontWeight: '700', color: COLORS.darkText },
   taskPreviewSub: { fontSize: 11, color: COLORS.mutedText },
-  taskPreviewTime: { fontSize: 11, color: COLORS.watermelon, fontWeight: '700' },
+  taskPreviewTime: { fontSize: 11, color: '#E8748A', fontWeight: '700' },
   modalBtnRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
-  modalCancelBtn: { flex: 1, borderRadius: 16, paddingVertical: 14, alignItems: 'center', borderWidth: 2, borderColor: COLORS.pastelPink },
+  modalCancelBtn: { flex: 1, borderRadius: 16, paddingVertical: 14, alignItems: 'center', borderWidth: 2, borderColor: '#F5A8B8' },
   modalCancelBtnText: { fontSize: 14, color: COLORS.mutedText, fontWeight: '700' },
-  modalConfirmBtn: { flex: 2, borderRadius: 16, paddingVertical: 14, alignItems: 'center', backgroundColor: COLORS.watermelon, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
+  modalConfirmBtn: { flex: 2, borderRadius: 16, paddingVertical: 14, alignItems: 'center', backgroundColor: '#E8748A', shadowColor: '#D06070', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
   modalConfirmBtnText: { fontSize: 14, color: COLORS.white, fontWeight: '800' },
 });

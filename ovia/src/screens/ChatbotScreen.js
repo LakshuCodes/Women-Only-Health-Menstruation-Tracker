@@ -5,21 +5,44 @@ import {
   Animated, Dimensions, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// ── Vector Icon helper ──
+const Ico = ({ name, size = 20, color = '#E8748A' }) => (
+  <Ionicons name={name} size={size} color={color} />
+);
+
 import Svg, { Path, Line } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink: '#FFB3C6',
-  lightPink: '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon: '#FB6F92',
-  white: '#FFFFFF',
-  darkText: '#2D1B1E',
-  mutedText: '#9B6B78',
-  bubbleUser: '#FB6F92',
-  bubbleBot: '#FFFFFF',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 // ─────────────────────────────────────────────────────
@@ -80,7 +103,7 @@ const ChatBubbleHeart = ({ size = 32 }) => (
   <Svg width={size} height={size * 0.88} viewBox="0 0 120 106" fill="none">
     <Path
       d="M60 4 C28 4, 4 22, 4 46 C4 67, 24 82, 50 85 C52 85, 53 88, 52 98 C52 100, 54 101, 55 99 C62 90, 68 87, 72 85 C97 82, 116 66, 116 46 C116 22, 92 4, 60 4 Z"
-      fill="#FB6F92"
+      fill="#E8748A"
     />
     <Path
       d="M30 14 C38 10, 50 8, 62 9 C74 10, 84 14, 88 20 C80 16, 68 13, 56 13 C44 13, 34 16, 30 14 Z"
@@ -142,7 +165,7 @@ export default function ChatbotScreen({ navigation }) {
     {
       id: '0',
       role: 'assistant',
-      content: "Hi! I'm Ovia AI 🌸 Your personal women's health companion.\n\nAsk me anything about your cycle, PCOS, pregnancy, nutrition, or general health. I'm here to help!",
+      content: "Hi! I'm Ovia AI! Your personal women's health companion.\n\nAsk me anything about your cycle, PCOS, pregnancy, nutrition, or general health. I'm here to help!",
       time: 'Now',
     },
   ]);
@@ -199,7 +222,7 @@ export default function ChatbotScreen({ navigation }) {
       const errMsg = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "I'm having trouble connecting right now. Please check your internet connection and try again 💕",
+        content: "I'm having trouble connecting right now. Please check your internet connection and try again.",
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isError: true,
       };
@@ -235,7 +258,7 @@ export default function ChatbotScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.watermelon} />
+      <StatusBar barStyle="light-content" backgroundColor={'#E8748A'} />
 
       {/* ── HEADER ── */}
       <View style={styles.header}>
@@ -262,7 +285,7 @@ export default function ChatbotScreen({ navigation }) {
           onPress={() => {
             setMessages([{
               id: '0', role: 'assistant',
-              content: "Hi! I'm Ovia AI 🌸 Your personal women's health companion.\n\nAsk me anything about your cycle, PCOS, pregnancy, nutrition, or general health. I'm here to help!",
+              content: "Hi! I'm Ovia AI! Your personal women's health companion.\n\nAsk me anything about your cycle, PCOS, pregnancy, nutrition, or general health. I'm here to help!",
               time: 'Now',
             }]);
             setShowChips(true);
@@ -300,7 +323,7 @@ export default function ChatbotScreen({ navigation }) {
           {/* Quick chips — only shown at start */}
           {showChips && !isLoading && (
             <View style={styles.chipsSection}>
-              <Text style={styles.chipsSectionLabel}>💡 Try asking:</Text>
+              <View style={{flexDirection:'row',alignItems:'center',gap:6,marginBottom:8}}><Ico name='bulb-outline' size={14} color={COLORS.mutedText??'#8F6470'}/><Text style={styles.chipsSectionLabel}>Try asking:</Text></View>
               <View style={styles.chipsWrap}>
                 {QUICK_CHIPS.map((chip, i) => (
                   <TouchableOpacity
@@ -357,15 +380,15 @@ export default function ChatbotScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
+  safeArea: { flex: 1, backgroundColor: COLORS.bg || '#FDF0F3' },
 
   // Header
   header: {
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
     flexDirection: 'row', alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 12,
-    shadowColor: COLORS.watermelon,
+    shadowColor: '#D06070',
     shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 8,
   },
   backBtn: {
@@ -392,7 +415,7 @@ const styles = StyleSheet.create({
   clearBtnText: { color: COLORS.white, fontSize: 12, fontWeight: '700' },
 
   // Messages
-  messagesList: { flex: 1, backgroundColor: COLORS.lavenderBlush },
+  messagesList: { flex: 1, backgroundColor: '#FDE8ED' },
   messagesContent: { paddingHorizontal: 16, paddingTop: 16 },
 
   msgRow: { flexDirection: 'row', marginBottom: 14, alignItems: 'flex-end' },
@@ -403,8 +426,8 @@ const styles = StyleSheet.create({
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center',
     marginRight: 8, flexShrink: 0,
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
-    shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1.5, borderColor: '#FAD4DC',
+    shadowColor: '#D06070', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15, shadowRadius: 4, elevation: 2,
   },
 
@@ -421,7 +444,7 @@ const styles = StyleSheet.create({
   bubbleBot: {
     backgroundColor: COLORS.bubbleBot,
     borderBottomLeftRadius: 4,
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
+    borderWidth: 1.5, borderColor: '#FAD4DC',
   },
   bubbleError: {
     backgroundColor: '#FFF3E0', borderColor: '#FFCC80',
@@ -437,7 +460,7 @@ const styles = StyleSheet.create({
   typingBubble: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: COLORS.white, borderRadius: 20, paddingHorizontal: 18, paddingVertical: 16,
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
+    borderWidth: 1.5, borderColor: '#FAD4DC',
   },
   typingDot: {
     width: 8, height: 8, borderRadius: 4,
@@ -451,11 +474,11 @@ const styles = StyleSheet.create({
   quickChip: {
     backgroundColor: COLORS.white, borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 9,
-    borderWidth: 1.5, borderColor: COLORS.pastelPink,
-    shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1.5, borderColor: '#F5A8B8',
+    shadowColor: '#D8808E', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12, shadowRadius: 4, elevation: 2,
   },
-  quickChipText: { fontSize: 12, color: COLORS.watermelon, fontWeight: '700' },
+  quickChipText: { fontSize: 12, color: '#E8748A', fontWeight: '700' },
 
   // Input
   inputBar: {
@@ -467,9 +490,9 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     flexDirection: 'row', alignItems: 'flex-end',
-    backgroundColor: COLORS.lavenderBlush, borderRadius: 28,
+    backgroundColor: '#FDE8ED', borderRadius: 28,
     paddingLeft: 18, paddingRight: 6, paddingVertical: 6,
-    borderWidth: 1.5, borderColor: COLORS.pastelPink,
+    borderWidth: 1.5, borderColor: '#F5A8B8',
     marginBottom: 8,
   },
   input: {
@@ -478,10 +501,10 @@ const styles = StyleSheet.create({
   },
   sendBtn: {
     width: 42, height: 42, borderRadius: 21,
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
     alignItems: 'center', justifyContent: 'center',
     marginLeft: 8,
-    shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 3 },
+    shadowColor: '#D06070', shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.35, shadowRadius: 6, elevation: 5,
   },
   sendBtnDisabled: { backgroundColor: COLORS.pastelPink, shadowOpacity: 0 },

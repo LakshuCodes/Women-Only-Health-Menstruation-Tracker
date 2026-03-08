@@ -1,263 +1,182 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   TextInput, Alert, Modal, KeyboardAvoidingView, Platform,
-  StatusBar, Dimensions, Image, Switch,
+  StatusBar, Dimensions, Image, Switch, Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import Svg, { Path, Rect, Line, Circle, Ellipse } from 'react-native-svg';
 import { getUserName, setUserName } from './HomeScreen';
 
 const { width } = Dimensions.get('window');
+const Ico = ({ name, size = 20, color = '#E8748A' }) => <Ionicons name={name} size={size} color={color} />;
 
-const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink:    '#FFB3C6',
-  lightPink:     '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon:    '#FB6F92',
-  deepPink:      '#E8487A',
-  white:         '#FFFFFF',
-  darkText:      '#2D1B1E',
-  mutedText:     '#9B6B78',
-  error:         '#E53935',
-  green:         '#4CAF50',
-  lightGreen:    '#E8F5E9',
+// ── Soft rose palette matching dashboard ──
+const C = {
+  bg:         '#FDF0F3',
+  card:       '#FFFFFF',
+  rose:       '#E8748A',
+  roseDark:   '#C95470',
+  roseLight:  '#F5A8B8',
+  roseFog:    '#FAD4DC',
+  roseMist:   '#FDE8ED',
+  roseCircle: '#FADADF',
+  purple:     '#A78FD0',
+  green:      '#5BBF87',
+  text:       '#2C1A20',
+  sub:        '#8F6470',
+  faint:      '#BFA0AA',
+  white:      '#FFFFFF',
+  error:      '#E05555',
 };
 
+const cardShadow = {
+  shadowColor: '#D06070',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.08,
+  shadowRadius: 12,
+  elevation: 3,
+};
+
+// ── Shared email store ──
 let _userEmail = 'maya@example.com';
 export const getUserEmail = () => _userEmail;
 export const setUserEmail = (e) => { _userEmail = e; };
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // SUB-SCREEN: Notifications
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 function NotificationsSubScreen({ onBack }) {
   const [settings, setSettings] = useState({
-    secretChats:   true,
-    personalAdvice: true,
-    periodSoon:    true,
-    ovulation:     false,
-    periodEnd:     false,
-    periodStart:   true,
-    contraception: false,
-    lifestyle:     true,
-    waterReminder: false,
-    sleepReminder: true,
-    exerciseReminder: false,
+    personalAdvice: true, periodSoon: true, ovulation: false,
+    periodEnd: false, periodStart: true, contraception: false,
+    waterReminder: false, sleepReminder: true, exerciseReminder: false,
   });
+  const toggle = (k) => setSettings(p => ({ ...p, [k]: !p[k] }));
 
-  const toggle = (key) => setSettings(p => ({ ...p, [key]: !p[key] }));
-
-  const Section = ({ title }) => (
-    <Text style={notifStyles.sectionHeader}>{title}</Text>
+  const SectionHead = ({ title }) => (
+    <Text style={nS.sHead}>{title}</Text>
   );
-
-  const Row = ({ label, sub, settingKey }) => (
-    <View style={notifStyles.row}>
+  const Row = ({ label, sub, k }) => (
+    <View style={nS.row}>
       <View style={{ flex: 1 }}>
-        <Text style={notifStyles.rowLabel}>{label}</Text>
-        {sub ? <Text style={notifStyles.rowSub}>{sub}</Text> : null}
+        <Text style={nS.rowLbl}>{label}</Text>
+        {sub ? <Text style={nS.rowSub}>{sub}</Text> : null}
       </View>
-      <Switch
-        value={settings[settingKey]}
-        onValueChange={() => toggle(settingKey)}
-        trackColor={{ false: COLORS.pinkChampagne, true: COLORS.watermelon }}
-        thumbColor={COLORS.white}
-        ios_backgroundColor={COLORS.pinkChampagne}
+      <Switch value={settings[k]} onValueChange={() => toggle(k)}
+        trackColor={{ false: C.roseFog, true: C.rose }}
+        thumbColor={C.white} ios_backgroundColor={C.roseFog}
       />
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
-      <View style={styles.subHeader}>
-        <TouchableOpacity style={styles.subBackBtn} onPress={onBack}>
-          <Text style={styles.subBackArrow}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.subHeaderTitle}>Notifications</Text>
-        <View style={{ width: 36 }} />
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        <View style={notifStyles.card}>
-          <Section title="Secret Chats" />
-          <Row label="Secret Chats notifications" sub="On" settingKey="secretChats" />
-        </View>
-
-        <View style={notifStyles.card}>
-          <Section title="Content" />
-          <Row label="Personal advice" sub="On" settingKey="personalAdvice" />
-        </View>
-
-        <View style={notifStyles.card}>
-          <Section title="Cycle" />
-          <Row label="Period in a couple of days" sub="10:00 am" settingKey="periodSoon" />
-          <View style={notifStyles.divider} />
-          <Row label="Ovulation" sub="Off" settingKey="ovulation" />
-          <View style={notifStyles.divider} />
-          <Row label="Period end" sub="Off" settingKey="periodEnd" />
-          <View style={notifStyles.divider} />
-          <Row label="Period start" sub="10:00 am" settingKey="periodStart" />
-        </View>
-
-        <View style={notifStyles.card}>
-          <Section title="Medication and contraception" />
-          <Row label="Contraception" sub="Off" settingKey="contraception" />
-          <TouchableOpacity style={notifStyles.addPillBtn}>
-            <Text style={notifStyles.addPillText}>+ ADD A PILL REMINDER</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={notifStyles.card}>
-          <Section title="Lifestyle" />
-          <Row label="Daily water reminder" settingKey="waterReminder" />
-          <View style={notifStyles.divider} />
-          <Row label="Sleep reminder" settingKey="sleepReminder" />
-          <View style={notifStyles.divider} />
-          <Row label="Exercise reminder" settingKey="exerciseReminder" />
-        </View>
+    <SafeAreaView style={S.safe} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
+      <SubHeader title="Notifications" onBack={onBack} />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 48, paddingTop: 8 }}>
+        {[
+          { title: 'Content', rows: [{ label: 'Personal advice', sub: 'On', k: 'personalAdvice' }] },
+          { title: 'Cycle', rows: [
+            { label: 'Period in a couple of days', sub: '10:00 AM', k: 'periodSoon' },
+            { label: 'Ovulation', sub: 'Off', k: 'ovulation' },
+            { label: 'Period end', sub: 'Off', k: 'periodEnd' },
+            { label: 'Period start', sub: '10:00 AM', k: 'periodStart' },
+          ]},
+          { title: 'Medication', rows: [{ label: 'Contraception', sub: 'Off', k: 'contraception' }] },
+          { title: 'Lifestyle', rows: [
+            { label: 'Daily water reminder', k: 'waterReminder' },
+            { label: 'Sleep reminder', k: 'sleepReminder' },
+            { label: 'Exercise reminder', k: 'exerciseReminder' },
+          ]},
+        ].map((sec, si) => (
+          <View key={si} style={nS.card}>
+            <SectionHead title={sec.title} />
+            {sec.rows.map((r, ri) => (
+              <View key={ri}>
+                <Row {...r} />
+                {ri < sec.rows.length - 1 && <View style={nS.div} />}
+              </View>
+            ))}
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const notifStyles = StyleSheet.create({
-  card: {
-    backgroundColor: COLORS.white, marginHorizontal: 16, marginTop: 16,
-    borderRadius: 18, overflow: 'hidden',
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
-    shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
-  },
-  sectionHeader: {
-    fontSize: 12, fontWeight: '700', color: COLORS.watermelon,
-    paddingHorizontal: 18, paddingTop: 14, paddingBottom: 6, letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  row: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 18, paddingVertical: 14,
-  },
-  rowLabel: { fontSize: 15, fontWeight: '600', color: COLORS.darkText },
-  rowSub: { fontSize: 12, color: COLORS.mutedText, marginTop: 2 },
-  divider: { height: 1, backgroundColor: COLORS.lavenderBlush, marginHorizontal: 18 },
-  addPillBtn: { paddingHorizontal: 18, paddingVertical: 14 },
-  addPillText: { fontSize: 13, fontWeight: '800', color: COLORS.watermelon, letterSpacing: 0.5 },
+const nS = StyleSheet.create({
+  card: { backgroundColor: C.white, marginHorizontal: 18, marginTop: 14, borderRadius: 20, overflow: 'hidden', ...cardShadow },
+  sHead: { fontSize: 11, fontWeight: '800', color: C.rose, paddingHorizontal: 18, paddingTop: 16, paddingBottom: 6, letterSpacing: 0.8, textTransform: 'uppercase' },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 14 },
+  rowLbl: { fontSize: 15, fontWeight: '600', color: C.text },
+  rowSub: { fontSize: 12, color: C.sub, marginTop: 2 },
+  div: { height: 1, backgroundColor: C.roseMist, marginHorizontal: 18 },
 });
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // SUB-SCREEN: Privacy & Security
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 function PrivacySubScreen({ onBack }) {
-  const [showPrivacyInfo, setShowPrivacyInfo] = useState(false);
-
-  const privacyItems = [
-    {
-      icon: '🛡️',
-      title: 'Ovia Privacy Explained',
-      sub: 'Find out how Ovia keeps your data safe.',
-      onPress: () => setShowPrivacyInfo(true),
-    },
-    {
-      icon: 'ℹ️',
-      title: 'Request Information',
-      sub: 'Find out what cycle and health-related data we hold about you.',
-      onPress: () => Alert.alert('Request Information', 'A data report will be sent to your registered email within 48 hours.', [{ text: 'Request', style: 'default' }, { text: 'Cancel', style: 'cancel' }]),
-    },
-    {
-      icon: '👤',
-      title: 'Change Account Details',
-      sub: 'Ask us to update your personal details, such as your name or email address.',
-      onPress: () => Alert.alert('Change Account Details', 'To update your email or personal details, contact support@oviahealth.com', [{ text: 'OK' }]),
-    },
-    {
-      icon: '📋',
-      title: 'Manage Your Consents',
-      sub: 'Choose and control your privacy options.',
-      onPress: () => Alert.alert('Manage Consents', 'You can opt out of analytics, personalised content, and third-party sharing at any time.', [{ text: 'Manage', style: 'default' }, { text: 'Cancel', style: 'cancel' }]),
-    },
-    {
-      icon: '🗑️',
-      title: 'Delete My Account',
-      sub: 'Permanently delete your account and any data associated with it, including cycle and health-related data.',
-      onPress: () => Alert.alert(
-        'Delete Account',
-        'This will permanently delete your account and ALL your health data. This cannot be undone.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete Forever', style: 'destructive', onPress: () => Alert.alert('Account Deleted', 'Your account has been scheduled for deletion.') },
-        ]
-      ),
-      danger: true,
-    },
+  const [showModal, setShowModal] = useState(false);
+  const items = [
+    { icon: 'shield-checkmark', title: 'Ovia Privacy Explained', sub: 'How Ovia keeps your data safe', onPress: () => setShowModal(true) },
+    { icon: 'information-circle', title: 'Request Information', sub: 'Find out what data we hold about you', onPress: () => Alert.alert('Data Request', 'A report will be sent to your email within 48 hours.', [{ text: 'Request' }, { text: 'Cancel', style: 'cancel' }]) },
+    { icon: 'person', title: 'Change Account Details', sub: 'Update your name or email address', onPress: () => Alert.alert('Account Details', 'Contact support@oviahealth.com to update your email.', [{ text: 'OK' }]) },
+    { icon: 'document-text', title: 'Manage Your Consents', sub: 'Choose and control your privacy options', onPress: () => Alert.alert('Manage Consents', 'You can opt out of analytics and personalised content at any time.', [{ text: 'Manage' }, { text: 'Cancel', style: 'cancel' }]) },
+    { icon: 'trash', title: 'Delete My Account', sub: 'Permanently delete account and all data', danger: true, onPress: () => Alert.alert('Delete Account', 'This will permanently delete your account and ALL health data. This cannot be undone.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Delete Forever', style: 'destructive', onPress: () => Alert.alert('Account Deleted', 'Your account has been scheduled for deletion.') }]) },
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
-      <View style={styles.subHeader}>
-        <TouchableOpacity style={styles.subBackBtn} onPress={onBack}>
-          <Text style={styles.subBackArrow}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.subHeaderTitle}>Privacy Settings</Text>
-        <View style={{ width: 36 }} />
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        <View style={privStyles.card}>
-          {privacyItems.map((item, idx) => (
+    <SafeAreaView style={S.safe} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
+      <SubHeader title="Privacy & Security" onBack={onBack} />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 48, paddingTop: 8 }}>
+        <View style={[pS.card, { marginTop: 14 }]}>
+          {items.map((item, idx) => (
             <View key={idx}>
-              <TouchableOpacity style={privStyles.row} onPress={item.onPress} activeOpacity={0.7}>
-                <View style={[privStyles.iconBadge, item.danger && { backgroundColor: '#FFEBEE' }]}>
-                  <Text style={{ fontSize: 20 }}>{item.icon}</Text>
+              <TouchableOpacity style={pS.row} onPress={item.onPress} activeOpacity={0.7}>
+                <View style={[pS.badge, item.danger && { backgroundColor: '#FFECEC' }]}>
+                  <Ico name={item.icon} size={19} color={item.danger ? C.error : C.rose} />
                 </View>
-                <View style={{ flex: 1, marginRight: 10 }}>
-                  <Text style={[privStyles.rowTitle, item.danger && { color: COLORS.error }]}>{item.title}</Text>
-                  <Text style={privStyles.rowSub}>{item.sub}</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={[pS.rowT, item.danger && { color: C.error }]}>{item.title}</Text>
+                  <Text style={pS.rowS}>{item.sub}</Text>
                 </View>
-                <Text style={privStyles.chevron}>›</Text>
+                <Ico name="chevron-forward" size={16} color={C.roseFog} />
               </TouchableOpacity>
-              {idx < privacyItems.length - 1 && <View style={privStyles.divider} />}
+              {idx < items.length - 1 && <View style={pS.div} />}
             </View>
           ))}
         </View>
-
-        {/* Data Protected Banner */}
-        <View style={privStyles.protectedBanner}>
-          <Text style={{ fontSize: 28, marginBottom: 8 }}>🔒</Text>
-          <Text style={privStyles.protectedTitle}>Your data is protected</Text>
-          <Text style={privStyles.protectedSub}>
-            Privacy is our top priority. We'll never sell your data and you can delete it anytime.
-          </Text>
-          <TouchableOpacity style={privStyles.learnMoreBtn}
-            onPress={() => setShowPrivacyInfo(true)}>
-            <Text style={privStyles.learnMoreText}>Learn more</Text>
+        <View style={pS.protCard}>
+          <View style={pS.lockRing}><Ico name="lock-closed" size={30} color={C.rose} /></View>
+          <Text style={pS.protT}>Your data is protected</Text>
+          <Text style={pS.protS}>We never sell your data and you can delete it at any time.</Text>
+          <TouchableOpacity style={pS.learnBtn} onPress={() => setShowModal(true)}>
+            <Text style={pS.learnTxt}>Learn more</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Ovia Privacy Explained Modal */}
-      <Modal visible={showPrivacyInfo} animationType="slide" transparent onRequestClose={() => setShowPrivacyInfo(false)}>
-        <View style={privStyles.modalOverlay}>
-          <View style={privStyles.modalSheet}>
-            <View style={privStyles.modalHandle} />
-            <View style={privStyles.modalHeaderRow}>
-              <Text style={privStyles.modalTitle}>🛡️ Ovia Privacy Explained</Text>
-              <TouchableOpacity onPress={() => setShowPrivacyInfo(false)}>
-                <Text style={{ fontSize: 22, color: COLORS.mutedText }}>✕</Text>
-              </TouchableOpacity>
+      <Modal visible={showModal} animationType="slide" transparent onRequestClose={() => setShowModal(false)}>
+        <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' }}>
+          <View style={pS.modal}>
+            <View style={pS.modalHandle} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <Text style={pS.modalT}>Ovia Privacy Explained</Text>
+              <TouchableOpacity onPress={() => setShowModal(false)}><Ico name="close" size={22} color={C.sub} /></TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
               {[
-                { title: '🔐 Your data stays yours', body: 'All your cycle, health, and personal data belongs to you alone. Ovia never sells or rents your data to third parties.' },
-                { title: '🏥 Health data is sensitive', body: 'We treat menstrual and health data with the highest level of care. It\'s encrypted end-to-end and never shared without your explicit consent.' },
-                { title: '📊 Analytics are anonymous', body: 'If you opt into analytics, all data is anonymised and aggregated. We use it only to improve app features.' },
-                { title: '🗑️ Right to deletion', body: 'You can permanently delete your account and all associated data at any time from Privacy Settings → Delete My Account.' },
-                { title: '🌍 GDPR & DPDP compliant', body: 'Ovia complies with GDPR (Europe) and India\'s Digital Personal Data Protection Act. You have full rights to access, correct, and erase your data.' },
+                { t: 'Your data stays yours', b: 'All your cycle, health, and personal data belongs to you alone. Ovia never sells or rents your data to third parties.' },
+                { t: 'Health data is sensitive', b: "We treat menstrual and health data with the highest level of care. It's encrypted end-to-end and never shared without your explicit consent." },
+                { t: 'Analytics are anonymous', b: 'If you opt into analytics, all data is anonymised and aggregated. We use it only to improve app features.' },
+                { t: 'Right to deletion', b: 'You can permanently delete your account and all associated data at any time from Privacy Settings.' },
+                { t: 'GDPR & DPDP compliant', b: "Ovia complies with GDPR (Europe) and India's Digital Personal Data Protection Act." },
               ].map((item, i) => (
-                <View key={i} style={privStyles.privacyPoint}>
-                  <Text style={privStyles.privacyPointTitle}>{item.title}</Text>
-                  <Text style={privStyles.privacyPointBody}>{item.body}</Text>
+                <View key={i} style={pS.point}>
+                  <Text style={pS.pointT}>{item.t}</Text>
+                  <Text style={pS.pointB}>{item.b}</Text>
                 </View>
               ))}
               <View style={{ height: 20 }} />
@@ -268,299 +187,246 @@ function PrivacySubScreen({ onBack }) {
     </SafeAreaView>
   );
 }
-
-const privStyles = StyleSheet.create({
-  card: {
-    backgroundColor: COLORS.white, marginHorizontal: 16, marginTop: 20,
-    borderRadius: 20, overflow: 'hidden',
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
-    shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
-  },
+const pS = StyleSheet.create({
+  card: { backgroundColor: C.white, marginHorizontal: 18, borderRadius: 22, overflow: 'hidden', ...cardShadow },
   row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 16 },
-  iconBadge: {
-    width: 46, height: 46, borderRadius: 23,
-    backgroundColor: COLORS.lavenderBlush, alignItems: 'center', justifyContent: 'center',
-    marginRight: 14, borderWidth: 1, borderColor: COLORS.pinkChampagne,
-  },
-  rowTitle: { fontSize: 15, fontWeight: '700', color: COLORS.darkText, marginBottom: 3 },
-  rowSub: { fontSize: 12, color: COLORS.mutedText, lineHeight: 17 },
-  chevron: { fontSize: 20, color: COLORS.pastelPink },
-  divider: { height: 1, backgroundColor: COLORS.lavenderBlush, marginHorizontal: 16 },
-
-  protectedBanner: {
-    backgroundColor: COLORS.white, marginHorizontal: 16, marginTop: 20,
-    borderRadius: 20, padding: 24, alignItems: 'center',
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
-    shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
-  },
-  protectedTitle: { fontSize: 16, fontWeight: '800', color: COLORS.darkText, marginBottom: 8 },
-  protectedSub: { fontSize: 13, color: COLORS.mutedText, textAlign: 'center', lineHeight: 20, marginBottom: 16 },
-  learnMoreBtn: {
-    borderWidth: 1.5, borderColor: COLORS.watermelon, borderRadius: 20,
-    paddingHorizontal: 24, paddingVertical: 10,
-  },
-  learnMoreText: { fontSize: 13, fontWeight: '700', color: COLORS.watermelon },
-
-  modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
-  modalSheet: {
-    backgroundColor: COLORS.white, borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    padding: 20, maxHeight: '85%',
-  },
-  modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: COLORS.pinkChampagne, alignSelf: 'center', marginBottom: 16 },
-  modalHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 17, fontWeight: '800', color: COLORS.darkText },
-  privacyPoint: {
-    backgroundColor: COLORS.lavenderBlush, borderRadius: 14, padding: 16, marginBottom: 12,
-    borderWidth: 1, borderColor: COLORS.pinkChampagne,
-  },
-  privacyPointTitle: { fontSize: 14, fontWeight: '800', color: COLORS.darkText, marginBottom: 6 },
-  privacyPointBody: { fontSize: 13, color: COLORS.mutedText, lineHeight: 20 },
+  badge: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.roseMist, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
+  rowT: { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 2 },
+  rowS: { fontSize: 12, color: C.sub, lineHeight: 16 },
+  div: { height: 1, backgroundColor: C.roseMist, marginHorizontal: 16 },
+  protCard: { backgroundColor: C.white, marginHorizontal: 18, marginTop: 18, borderRadius: 22, padding: 24, alignItems: 'center', ...cardShadow },
+  lockRing: { width: 64, height: 64, borderRadius: 32, backgroundColor: C.roseMist, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  protT: { fontSize: 16, fontWeight: '800', color: C.text, marginBottom: 8 },
+  protS: { fontSize: 13, color: C.sub, textAlign: 'center', lineHeight: 20, marginBottom: 16 },
+  learnBtn: { borderWidth: 1.5, borderColor: C.rose, borderRadius: 20, paddingHorizontal: 24, paddingVertical: 10 },
+  learnTxt: { fontSize: 13, fontWeight: '700', color: C.rose },
+  modal: { backgroundColor: C.white, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 22, maxHeight: '85%' },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: C.roseFog, alignSelf: 'center', marginBottom: 18 },
+  modalT: { fontSize: 17, fontWeight: '800', color: C.text },
+  point: { backgroundColor: C.roseMist, borderRadius: 14, padding: 16, marginBottom: 10 },
+  pointT: { fontSize: 14, fontWeight: '800', color: C.text, marginBottom: 5 },
+  pointB: { fontSize: 13, color: C.sub, lineHeight: 20 },
 });
 
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // SUB-SCREEN: Help & Features
-// ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 function HelpSubScreen({ onBack }) {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState(null);
 
-  const HELP_CATEGORIES = [
-    { key: 'getting_started', icon: '🚀', title: 'Getting Started',   color: '#FFF3E0' },
-    { key: 'account',         icon: '👤', title: 'Account & Data',    color: '#E8F5E9' },
-    { key: 'using_ovia',      icon: '🌸', title: 'Using Ovia',        color: '#FCE4EC' },
-    { key: 'subscription',    icon: '💳', title: 'Subscriptions & Billing', color: '#E3F2FD' },
-    { key: 'troubleshoot',    icon: '🔧', title: 'Troubleshooting',   color: '#F3E5F5' },
-    { key: 'privacy_help',    icon: '🔒', title: 'Privacy & Security', color: '#E0F7FA' },
-    { key: 'general',         icon: '❓', title: 'General Questions', color: '#FFF8E1' },
-    { key: 'partners',        icon: '💑', title: 'Ovia for Partners', color: COLORS.lavenderBlush },
+  const CATS = [
+    { icon: 'rocket',        title: 'Getting Started',    bg: '#FFF3E0' },
+    { icon: 'person',        title: 'Account & Data',     bg: '#E8F5E9' },
+    { icon: 'flower',        title: 'Using Ovia',         bg: '#FDE8ED' },
+    { icon: 'card',          title: 'Subscriptions',      bg: '#E3F2FD' },
+    { icon: 'construct',     title: 'Troubleshooting',    bg: '#F3E5F5' },
+    { icon: 'lock-closed',   title: 'Privacy',            bg: '#E0F7FA' },
+    { icon: 'help-circle',   title: 'General',            bg: '#FFF8E1' },
+    { icon: 'people',        title: 'For Partners',       bg: '#FDE8ED' },
   ];
 
   const FAQ = [
     { q: 'How does Ovia track my cycle?', a: 'Ovia uses the dates you log to predict your next period, fertile window, and ovulation day. The more you log, the more accurate your predictions become.' },
-    { q: 'How do I log my period?', a: 'Tap the Calendar tab → select the start date → tap "Add Task" → add a Period entry. Ovia will automatically calculate your next cycle.' },
-    { q: 'What is the Chatbot for?', a: 'The Ovia AI chatbot answers women\'s health questions — periods, PCOS, pregnancy, nutrition, and mental health. It\'s not a substitute for medical advice.' },
+    { q: 'How do I log my period?', a: 'Tap the Calendar tab → select the start date → tap "+ Add Task" → add a Period entry.' },
+    { q: 'What is the Chatbot for?', a: "The Ovia AI chatbot answers women's health questions — periods, PCOS, pregnancy, nutrition, and mental health." },
     { q: 'How do I set reminders?', a: 'Go to the Reminders section from the Home screen → tap "+ Add". You can set pill reminders, appointment reminders, and more.' },
-    { q: 'How do I find exercises for PCOS?', a: 'Go to the Exercise Modules tab → tap "PCOS" in the filter bar. You\'ll see yoga and workout videos specifically for PCOS management.' },
-    { q: 'Can I see doctors in the app?', a: 'Yes! The Doctor tab shows recommended specialists — gynecologists, therapists, nutritionists, and fertility experts. Tap any card to learn more.' },
-    { q: 'What does the Shop section do?', a: 'The Shop tab shows curated period & wellness products. Tapping Amazon or Flipkart opens the product search on that platform directly.' },
+    { q: 'How do I find exercises for PCOS?', a: 'Go to Exercise Modules → filter by PCOS. You\'ll see yoga and workout videos specifically for PCOS management.' },
+    { q: 'Can I see doctors in the app?', a: 'Yes! The Doctor tab shows recommended specialists — gynecologists, therapists, nutritionists, and fertility experts.' },
+    { q: 'What does the Shop section do?', a: 'The Shop tab shows curated period & wellness products. Tapping Amazon or Flipkart opens product search directly.' },
     { q: 'How do I delete my account?', a: 'Go to Profile → Privacy & Security → Delete My Account. This permanently removes all your data.' },
-    { q: 'Is my health data private?', a: 'Yes. Your data is encrypted and never sold. Read our full policy in Profile → Privacy & Security → Ovia Privacy Explained.' },
-    { q: 'How does the Daily Tasks reset work?', a: 'Daily tasks on the Calendar screen reset every midnight. Your previous tasks are saved — just tap any past date to review them.' },
+    { q: 'Is my health data private?', a: 'Yes. Your data is encrypted and never sold. Read our full policy in Profile → Privacy & Security.' },
+    { q: 'How does Daily Tasks reset work?', a: 'Daily tasks reset every midnight. Your previous tasks are saved — tap any past date to review them.' },
   ];
 
-  const filtered = FAQ.filter(f =>
-    !search || f.q.toLowerCase().includes(search.toLowerCase()) || f.a.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = FAQ.filter(f => !search || f.q.toLowerCase().includes(search.toLowerCase()) || f.a.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
-      <View style={styles.subHeader}>
-        <TouchableOpacity style={styles.subBackBtn} onPress={onBack}>
-          <Text style={styles.subBackArrow}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.subHeaderTitle}>Help & Features</Text>
-        <View style={{ width: 36 }} />
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-
-        {/* Hero */}
-        <View style={helpStyles.hero}>
-          <Text style={helpStyles.heroTitle}>How can Ovia help you?</Text>
-          <View style={helpStyles.searchBar}>
-            <Text style={{ fontSize: 16, marginRight: 8 }}>🔍</Text>
-            <TextInput
-              style={helpStyles.searchInput}
-              placeholder="What would you like to find?"
-              placeholderTextColor={COLORS.mutedText}
-              value={search}
-              onChangeText={setSearch}
-            />
-            {search.length > 0 && (
-              <TouchableOpacity onPress={() => setSearch('')}>
-                <Text style={{ color: COLORS.mutedText, fontSize: 16 }}>✕</Text>
-              </TouchableOpacity>
-            )}
+    <SafeAreaView style={S.safe} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
+      <SubHeader title="Help & Features" onBack={onBack} />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 48 }}>
+        <View style={hS.hero}>
+          <Text style={hS.heroT}>How can Ovia help?</Text>
+          <View style={hS.searchBar}>
+            <Ico name="search" size={16} color={C.sub} />
+            <TextInput style={hS.searchIn} placeholder="Search questions…" placeholderTextColor={C.faint} value={search} onChangeText={setSearch} />
+            {search.length > 0 && <TouchableOpacity onPress={() => setSearch('')}><Ico name="close-circle" size={18} color={C.sub} /></TouchableOpacity>}
           </View>
         </View>
-
-        {/* Feature categories grid */}
         {!search && (
           <>
-            <Text style={helpStyles.sectionTitle}>Browse by Topic</Text>
-            <View style={helpStyles.grid}>
-              {HELP_CATEGORIES.map(cat => (
-                <TouchableOpacity
-                  key={cat.key}
-                  style={[helpStyles.gridCard, { backgroundColor: cat.color }]}
-                  activeOpacity={0.75}
-                  onPress={() => Alert.alert(cat.title, `Tap a FAQ below to learn more about "${cat.title}".`)}
-                >
-                  <Text style={helpStyles.gridIcon}>{cat.icon}</Text>
-                  <Text style={helpStyles.gridLabel}>{cat.title}</Text>
+            <Text style={hS.secT}>Browse by Topic</Text>
+            <View style={hS.grid}>
+              {CATS.map((cat, i) => (
+                <TouchableOpacity key={i} style={[hS.gridCard, { backgroundColor: cat.bg }]} activeOpacity={0.75}
+                  onPress={() => Alert.alert(cat.title, `Tap an FAQ below for more about "${cat.title}".`)}>
+                  <Ico name={cat.icon} size={28} color={C.rose} />
+                  <Text style={hS.gridLbl}>{cat.title}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </>
         )}
-
-        {/* FAQ */}
-        <Text style={helpStyles.sectionTitle}>{search ? `Results for "${search}"` : 'Frequently Asked Questions'}</Text>
+        <Text style={hS.secT}>{search ? `Results for "${search}"` : 'Frequently Asked Questions'}</Text>
         {filtered.length === 0 && (
-          <View style={helpStyles.emptySearch}>
-            <Text style={{ fontSize: 36, marginBottom: 8 }}>🤷</Text>
-            <Text style={helpStyles.emptyText}>No results found. Try different keywords.</Text>
-          </View>
+          <View style={hS.empty}><Ico name="help-circle-outline" size={44} color={C.roseFog} /><Text style={hS.emptyT}>No results. Try different keywords.</Text></View>
         )}
-        <View style={helpStyles.faqCard}>
+        <View style={hS.faqCard}>
           {filtered.map((item, idx) => (
             <View key={idx}>
-              <TouchableOpacity
-                style={helpStyles.faqRow}
-                onPress={() => setExpanded(expanded === idx ? null : idx)}
-                activeOpacity={0.75}
-              >
-                <Text style={helpStyles.faqQ} numberOfLines={expanded === idx ? 0 : 2}>{item.q}</Text>
-                <Text style={helpStyles.faqChevron}>{expanded === idx ? '▲' : '▼'}</Text>
+              <TouchableOpacity style={hS.faqRow} onPress={() => setExpanded(expanded === idx ? null : idx)} activeOpacity={0.75}>
+                <Text style={hS.faqQ} numberOfLines={expanded === idx ? 0 : 2}>{item.q}</Text>
+                <Ico name={expanded === idx ? 'chevron-up' : 'chevron-down'} size={14} color={C.rose} />
               </TouchableOpacity>
-              {expanded === idx && (
-                <View style={helpStyles.faqAnswer}>
-                  <Text style={helpStyles.faqAnswerText}>{item.a}</Text>
-                </View>
-              )}
-              {idx < filtered.length - 1 && <View style={helpStyles.divider} />}
+              {expanded === idx && <View style={hS.faqA}><Text style={hS.faqAT}>{item.a}</Text></View>}
+              {idx < filtered.length - 1 && <View style={hS.div} />}
             </View>
           ))}
         </View>
-
-        {/* Contact support */}
-        <View style={helpStyles.supportCard}>
-          <Text style={{ fontSize: 28, marginBottom: 8 }}>💬</Text>
-          <Text style={helpStyles.supportTitle}>Still need help?</Text>
-          <Text style={helpStyles.supportSub}>Our support team is here for you.</Text>
-          <TouchableOpacity
-            style={helpStyles.supportBtn}
-            onPress={() => Alert.alert('Contact Support', 'Email us at support@oviahealth.com\nWe respond within 24 hours 🌸')}
-          >
-            <Text style={helpStyles.supportBtnText}>Contact Support</Text>
+        <View style={hS.supportCard}>
+          <View style={hS.supportIco}><Ico name="chatbubbles" size={30} color={C.rose} /></View>
+          <Text style={hS.supportT}>Still need help?</Text>
+          <Text style={hS.supportS}>Our support team is here for you.</Text>
+          <TouchableOpacity style={hS.supportBtn} onPress={() => Alert.alert('Contact Support', 'Email us at support@oviahealth.com\nWe respond within 24 hours.')}>
+            <Text style={hS.supportBT}>Contact Support</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const helpStyles = StyleSheet.create({
-  hero: {
-    backgroundColor: COLORS.lavenderBlush, margin: 16, borderRadius: 20,
-    padding: 20, borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
-  },
-  heroTitle: { fontSize: 20, fontWeight: '800', color: COLORS.darkText, marginBottom: 14 },
-  searchBar: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: COLORS.white, borderRadius: 14,
-    paddingHorizontal: 14, paddingVertical: 10,
-    borderWidth: 1.5, borderColor: COLORS.pastelPink,
-  },
-  searchInput: { flex: 1, fontSize: 14, color: COLORS.darkText },
-  sectionTitle: {
-    fontSize: 15, fontWeight: '800', color: COLORS.darkText,
-    marginHorizontal: 16, marginTop: 20, marginBottom: 12,
-  },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 12, gap: 10 },
-  gridCard: {
-    width: (width - 44) / 2, borderRadius: 18,
-    padding: 18, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
-    shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 2,
-  },
-  gridIcon: { fontSize: 30, marginBottom: 8 },
-  gridLabel: { fontSize: 13, fontWeight: '700', color: COLORS.darkText, textAlign: 'center' },
-  faqCard: {
-    backgroundColor: COLORS.white, marginHorizontal: 16,
-    borderRadius: 20, overflow: 'hidden',
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
-    shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
-  },
-  faqRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 16,
-  },
-  faqQ: { flex: 1, fontSize: 14, fontWeight: '700', color: COLORS.darkText, marginRight: 10 },
-  faqChevron: { fontSize: 12, color: COLORS.watermelon },
-  faqAnswer: { backgroundColor: COLORS.lavenderBlush, paddingHorizontal: 16, paddingVertical: 14, marginHorizontal: 0 },
-  faqAnswerText: { fontSize: 13, color: COLORS.mutedText, lineHeight: 20 },
-  divider: { height: 1, backgroundColor: COLORS.lavenderBlush, marginHorizontal: 16 },
-  emptySearch: { alignItems: 'center', paddingVertical: 30 },
-  emptyText: { fontSize: 13, color: COLORS.mutedText, textAlign: 'center' },
-  supportCard: {
-    backgroundColor: COLORS.white, marginHorizontal: 16, marginTop: 20,
-    borderRadius: 20, padding: 24, alignItems: 'center',
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
-    shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2,
-  },
-  supportTitle: { fontSize: 16, fontWeight: '800', color: COLORS.darkText, marginBottom: 6 },
-  supportSub: { fontSize: 13, color: COLORS.mutedText, marginBottom: 16 },
-  supportBtn: {
-    backgroundColor: COLORS.watermelon, borderRadius: 20,
-    paddingHorizontal: 28, paddingVertical: 12,
-    shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
-  },
-  supportBtnText: { color: COLORS.white, fontSize: 14, fontWeight: '800' },
+const hS = StyleSheet.create({
+  hero: { backgroundColor: C.roseMist, margin: 18, borderRadius: 22, padding: 20 },
+  heroT: { fontSize: 20, fontWeight: '800', color: C.text, marginBottom: 14 },
+  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.white, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 11, gap: 10 },
+  searchIn: { flex: 1, fontSize: 14, color: C.text },
+  secT: { fontSize: 15, fontWeight: '800', color: C.text, marginHorizontal: 18, marginTop: 20, marginBottom: 12 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 14, gap: 10 },
+  gridCard: { width: (width - 46) / 2, borderRadius: 18, padding: 18, alignItems: 'center', gap: 8, ...cardShadow },
+  gridLbl: { fontSize: 12, fontWeight: '700', color: C.text, textAlign: 'center' },
+  faqCard: { backgroundColor: C.white, marginHorizontal: 18, borderRadius: 22, overflow: 'hidden', ...cardShadow },
+  faqRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 16 },
+  faqQ: { flex: 1, fontSize: 14, fontWeight: '700', color: C.text, marginRight: 10 },
+  faqA: { backgroundColor: C.roseMist, paddingHorizontal: 18, paddingVertical: 14 },
+  faqAT: { fontSize: 13, color: C.sub, lineHeight: 20 },
+  div: { height: 1, backgroundColor: C.roseMist, marginHorizontal: 18 },
+  empty: { alignItems: 'center', paddingVertical: 30, gap: 8 },
+  emptyT: { fontSize: 13, color: C.sub, textAlign: 'center' },
+  supportCard: { backgroundColor: C.white, marginHorizontal: 18, marginTop: 18, borderRadius: 22, padding: 24, alignItems: 'center', ...cardShadow },
+  supportIco: { width: 60, height: 60, borderRadius: 30, backgroundColor: C.roseMist, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  supportT: { fontSize: 16, fontWeight: '800', color: C.text, marginBottom: 6 },
+  supportS: { fontSize: 13, color: C.sub, marginBottom: 16 },
+  supportBtn: { backgroundColor: C.rose, borderRadius: 20, paddingHorizontal: 28, paddingVertical: 12, shadowColor: C.rose, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 8, elevation: 5 },
+  supportBT: { color: C.white, fontSize: 14, fontWeight: '800' },
 });
 
-// ─────────────────────────────────────────────────────────
-// MAIN PROFILE SCREEN
-// ─────────────────────────────────────────────────────────
-export default function ProfileScreen({ navigation }) {
-  const [userName, setLocalName]   = useState(getUserName());
-  const [userEmail]                = useState(getUserEmail());
-  const [profileImage, setProfileImage] = useState(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editName, setEditName]    = useState(getUserName());
-  const [editNameError, setEditNameError] = useState('');
+// ─────────────────────────────────────────
+// Shared Sub-Header component
+// ─────────────────────────────────────────
+function SubHeader({ title, onBack }) {
+  return (
+    <View style={S.subHead}>
+      <TouchableOpacity style={S.subBack} onPress={onBack} activeOpacity={0.75}>
+        <Ico name="chevron-back" size={20} color={C.rose} />
+      </TouchableOpacity>
+      <Text style={S.subTitle}>{title}</Text>
+      <View style={{ width: 38 }} />
+    </View>
+  );
+}
 
-  // Sub-screen routing: null | 'notifications' | 'privacy' | 'help'
-  const [subScreen, setSubScreen] = useState(null);
+// ═══════════════════════════════════════════════
+// MAIN PROFILE SCREEN
+// ═══════════════════════════════════════════════
+export default function ProfileScreen({ navigation }) {
+  const [userName,     setLocalName]  = useState(getUserName());
+  const [userEmail]                   = useState(getUserEmail());
+  const [profileImage, setProfileImage] = useState(null);
+  const [showEdit,     setShowEdit]   = useState(false);
+  const [editName,     setEditName]   = useState(getUserName());
+  const [editErr,      setEditErr]    = useState('');
+  const [subScreen,    setSubScreen]  = useState(null);
+  const [pickerError,  setPickerError] = useState(false);
+
+  // Entrance animation
+  const fadeA  = useRef(new Animated.Value(0)).current;
+  const slideA = useRef(new Animated.Value(20)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeA,  { toValue: 1, duration: 550, useNativeDriver: true }),
+      Animated.timing(slideA, { toValue: 0, duration: 450, useNativeDriver: true }),
+    ]).start();
+  }, []);
 
   const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
+  // ── Gallery photo picker ──
   const handleAvatarPress = () => {
-    Alert.alert('Profile Photo', 'Choose how to update your photo', [
-      { text: 'Choose from Library', onPress: pickImageFromLibrary },
+    const options = [
+      { text: 'Choose from Gallery', onPress: pickFromGallery },
       { text: 'Take Photo', onPress: takePhoto },
-      profileImage ? { text: 'Remove Photo', style: 'destructive', onPress: () => setProfileImage(null) } : null,
-      { text: 'Cancel', style: 'cancel' },
-    ].filter(Boolean));
+    ];
+    if (profileImage) options.push({ text: 'Remove Photo', style: 'destructive', onPress: () => setProfileImage(null) });
+    options.push({ text: 'Cancel', style: 'cancel' });
+    Alert.alert('Profile Photo', 'Update your profile picture', options);
   };
 
-  const pickImageFromLibrary = async () => {
+  const pickFromGallery = async () => {
+    let IP;
+    try { IP = require('expo-image-picker'); } catch { IP = null; }
+    if (!IP) {
+      setPickerError(true);
+      return;
+    }
     try {
-      const ImagePicker = require('expo-image-picker');
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') { Alert.alert('Permission needed'); return; }
-      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1,1], quality: 0.85 });
-      if (!result.canceled && result.assets?.[0]?.uri) setProfileImage(result.assets[0].uri);
-    } catch { Alert.alert('Install required', 'Run: npx expo install expo-image-picker'); }
+      const { status } = await IP.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please allow access to your photo library in Settings.');
+        return;
+      }
+      const result = await IP.launchImageLibraryAsync({
+        mediaTypes: IP.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        setProfileImage(result.assets[0].uri);
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Could not open gallery. Please try again.');
+    }
   };
 
   const takePhoto = async () => {
+    let IP;
+    try { IP = require('expo-image-picker'); } catch { IP = null; }
+    if (!IP) {
+      setPickerError(true);
+      return;
+    }
     try {
-      const ImagePicker = require('expo-image-picker');
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') { Alert.alert('Permission needed'); return; }
-      const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1,1], quality: 0.85 });
-      if (!result.canceled && result.assets?.[0]?.uri) setProfileImage(result.assets[0].uri);
-    } catch { Alert.alert('Install required', 'Run: npx expo install expo-image-picker'); }
+      const { status } = await IP.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please allow camera access in Settings.');
+        return;
+      }
+      const result = await IP.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.85 });
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        setProfileImage(result.assets[0].uri);
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Could not open camera. Please try again.');
+    }
   };
 
-  const handleSaveProfile = () => {
-    if (!editName.trim()) { setEditNameError('Name cannot be empty'); return; }
-    const newName = editName.trim();
-    setLocalName(newName);
-    setUserName(newName);
-    setShowEditModal(false);
+  const handleSave = () => {
+    if (!editName.trim()) { setEditErr('Name cannot be empty'); return; }
+    const n = editName.trim();
+    setLocalName(n);
+    setUserName(n);
+    setShowEdit(false);
   };
 
   const handleLogout = () => {
@@ -570,127 +436,201 @@ export default function ProfileScreen({ navigation }) {
     ]);
   };
 
-  // ── Render sub-screens ──
+  // ── Sub-screen routing ──
   if (subScreen === 'notifications') return <NotificationsSubScreen onBack={() => setSubScreen(null)} />;
   if (subScreen === 'privacy')       return <PrivacySubScreen       onBack={() => setSubScreen(null)} />;
   if (subScreen === 'help')          return <HelpSubScreen          onBack={() => setSubScreen(null)} />;
 
-  const SETTINGS_ITEMS = [
-    { key: 'notifications', icon: '🔔', label: 'Notifications',       sub: 'Cycle, medication & lifestyle alerts', onPress: () => setSubScreen('notifications') },
-    { key: 'privacy',       icon: '🛡️', label: 'Privacy & Security',  sub: 'Account details, data & deletion',   onPress: () => setSubScreen('privacy') },
-    { key: 'subscription',  icon: '💳', label: 'My Subscription',     sub: 'Manage your Ovia Premium plan',       onPress: () => Alert.alert('My Subscription', 'Premium plan is active ✨') },
-    { key: 'help',          icon: '❓', label: 'Help & Features',     sub: 'FAQs, how-to guides, contact support', onPress: () => setSubScreen('help') },
+  const SETTINGS = [
+    { key: 'notifications', icon: 'notifications', label: 'Notifications',    sub: 'Cycle, medication & lifestyle alerts', onPress: () => setSubScreen('notifications') },
+    { key: 'privacy',       icon: 'shield-checkmark', label: 'Privacy & Security', sub: 'Account details, data & deletion',   onPress: () => setSubScreen('privacy') },
+    { key: 'subscription',  icon: 'card',          label: 'My Subscription',  sub: 'Manage your Ovia Premium plan',       onPress: () => Alert.alert('Subscription', 'Premium plan is active ✨') },
+    { key: 'help',          icon: 'help-circle',   label: 'Help & Features',  sub: 'FAQs, how-to guides, contact support', onPress: () => setSubScreen('help') },
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.watermelon} />
+    <SafeAreaView style={S.safe} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={S.scrollContent}>
 
-        {/* ── HERO ── */}
-        <View style={styles.heroSection}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Text style={styles.backArrow}>‹</Text>
+        {/* ════════ HERO SECTION ════════ */}
+        <View style={S.hero}>
+          {/* Decorative soft blobs */}
+          <View style={S.heroBlob1} />
+          <View style={S.heroBlob2} />
+          <View style={S.heroBlob3} />
+
+          {/* Back button */}
+          <TouchableOpacity style={S.heroBack} onPress={() => navigation.goBack()} activeOpacity={0.75}>
+            <Ico name="chevron-back" size={20} color={C.rose} />
           </TouchableOpacity>
-          <Text style={styles.heroTitle}>My Profile</Text>
-          <View style={styles.heroBlob1} />
-          <View style={styles.heroBlob2} />
 
-          <TouchableOpacity style={styles.avatarWrapper} onPress={handleAvatarPress} activeOpacity={0.85}>
-            <View style={styles.avatarOuter}>
-              {profileImage
-                ? <Image source={{ uri: profileImage }} style={styles.avatarImage} />
-                : <View style={styles.avatarFallback}><Text style={styles.avatarInitials}>{initials}</Text></View>
-              }
+          {/* Title */}
+          <Text style={S.heroTitle}>My Profile</Text>
+
+          {/* ── Avatar with gallery tap ── */}
+          <TouchableOpacity style={S.avatarWrap} onPress={handleAvatarPress} activeOpacity={0.88}>
+            <View style={S.avatarRing}>
+              {profileImage ? (
+                <Image source={{ uri: profileImage }} style={S.avatarImg} />
+              ) : (
+                <View style={S.avatarFallback}>
+                  <Text style={S.avatarIni}>{initials}</Text>
+                </View>
+              )}
             </View>
-            <View style={styles.cameraBadge}><Text style={styles.cameraBadgeIcon}>📷</Text></View>
+            {/* Camera badge */}
+            <View style={S.camBadge}>
+              <Ico name="camera" size={13} color={C.white} />
+            </View>
           </TouchableOpacity>
+
+          {/* Gallery tap hint */}
+          <Text style={S.avatarHint}>Tap to change photo</Text>
         </View>
 
-        {/* ── INFO CARD ── */}
-        <View style={styles.infoCard}>
-          <Text style={styles.infoName}>{userName}</Text>
-          <Text style={styles.infoEmail}>{userEmail}</Text>
-          <View style={styles.premiumBadge}>
-            <Text style={styles.premiumDot}>●</Text>
-            <Text style={styles.premiumText}>Premium Status: Active</Text>
-          </View>
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.editProfileBtn} onPress={() => { setEditName(userName); setShowEditModal(true); }} activeOpacity={0.85}>
-              <Text style={styles.editProfileBtnText}>Edit Profile</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.85}>
-              <Text style={styles.logoutBtnText}>Logout</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        {/* ════════ INFO CARD ════════ */}
+        <Animated.View style={[S.infoCard, { opacity: fadeA, transform: [{ translateY: slideA }] }]}>
+          <Text style={S.infoName}>{userName}</Text>
+          <Text style={S.infoEmail}>{userEmail}</Text>
 
-        {/* ── SETTINGS ── */}
-        <View style={styles.settingsSection}>
-          <Text style={styles.settingsTitle}>Settings</Text>
-          <View style={styles.settingsCard}>
-            {SETTINGS_ITEMS.map((item, idx) => (
+          {/* Premium badge */}
+          <View style={S.premBadge}>
+            <View style={S.premDot} />
+            <Text style={S.premTxt}>Premium Status: Active</Text>
+          </View>
+
+          {/* Action buttons */}
+          <View style={S.actionRow}>
+            <TouchableOpacity
+              style={S.editBtn}
+              onPress={() => { setEditName(userName); setEditErr(''); setShowEdit(true); }}
+              activeOpacity={0.85}
+            >
+              <Ico name="create-outline" size={16} color={C.white} />
+              <Text style={S.editBtnTxt}>Edit Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={S.logoutBtn} onPress={handleLogout} activeOpacity={0.85}>
+              <Ico name="log-out-outline" size={16} color={C.sub} />
+              <Text style={S.logoutBtnTxt}>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+
+        {/* ════════ SETTINGS ════════ */}
+        <Animated.View style={[S.settingsWrap, { opacity: fadeA }]}>
+          <Text style={S.secTitle}>Settings</Text>
+          <View style={S.settingsCard}>
+            {SETTINGS.map((item, idx) => (
               <TouchableOpacity
                 key={item.key}
-                style={[styles.settingsRow, idx < SETTINGS_ITEMS.length - 1 && styles.settingsRowBorder]}
+                style={[S.settRow, idx < SETTINGS.length - 1 && S.settRowBorder]}
                 activeOpacity={0.7}
                 onPress={item.onPress}
               >
-                <View style={styles.settingsLeft}>
-                  <View style={styles.settingsIconBadge}>
-                    <Text style={styles.settingsIcon}>{item.icon}</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.settingsLabel}>{item.label}</Text>
-                    <Text style={styles.settingsSub}>{item.sub}</Text>
-                  </View>
+                <View style={S.settIcoBg}>
+                  <Ico name={item.icon} size={19} color={C.rose} />
                 </View>
-                <Text style={styles.settingsChevron}>›</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={S.settLabel}>{item.label}</Text>
+                  <Text style={S.settSub}>{item.sub}</Text>
+                </View>
+                <Ico name="chevron-forward" size={16} color={C.roseFog} />
               </TouchableOpacity>
             ))}
           </View>
-        </View>
+        </Animated.View>
 
-        <View style={styles.appInfoRow}>
-          <Text style={styles.appInfoText}>Ovia Health · Version 1.0.0</Text>
-          <Text style={styles.appInfoText}>🌸 Made with love</Text>
-        </View>
+        {/* ════════ FOOTER ════════ */}
+        <Animated.View style={[S.footer, { opacity: fadeA }]}>
+          <Text style={S.footerTxt}>Ovia Health · Version 1.0.0</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Ico name="heart" size={12} color={C.roseLight} />
+            <Text style={S.footerTxt}>Made with love</Text>
+          </View>
+        </Animated.View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
 
-      {/* ── EDIT PROFILE MODAL ── */}
-      <Modal visible={showEditModal} animationType="slide" transparent onRequestClose={() => setShowEditModal(false)}>
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setShowEditModal(false)} />
-          <View style={[styles.modalSheet, { paddingBottom: Platform.OS === 'ios' ? 36 : 24 }]}>
-            <View style={styles.sheetHandle} />
-            <View style={styles.modalHeader}>
-              <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                <Text style={styles.modalCancelText}>Cancel</Text>
+      {/* ════════ INSTALL BANNER MODAL ════════ */}
+      <Modal visible={pickerError} animationType="fade" transparent onRequestClose={() => setPickerError(false)}>
+        <View style={S.installOverlay}>
+          <View style={S.installCard}>
+            <View style={S.installIconWrap}>
+              <Ico name="image-outline" size={32} color={C.rose} />
+            </View>
+            <Text style={S.installTitle}>One-time setup needed</Text>
+            <Text style={S.installDesc}>
+              To enable gallery & camera access, run this command in your project terminal:
+            </Text>
+            <View style={S.installCmd}>
+              <Text style={S.installCmdTxt}>npx expo install expo-image-picker</Text>
+            </View>
+            <Text style={S.installStep}>Then restart your Expo dev server and try again.</Text>
+            <TouchableOpacity style={S.installBtn} onPress={() => setPickerError(false)} activeOpacity={0.85}>
+              <Text style={S.installBtnTxt}>Got it</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ════════ EDIT PROFILE MODAL ════════ */}
+      <Modal visible={showEdit} animationType="slide" transparent onRequestClose={() => setShowEdit(false)}>
+        <KeyboardAvoidingView style={{ flex: 1, justifyContent: 'flex-end' }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <TouchableOpacity style={S.modalBg} activeOpacity={1} onPress={() => setShowEdit(false)} />
+          <View style={[S.modalSheet, { paddingBottom: Platform.OS === 'ios' ? 40 : 28 }]}>
+            <View style={S.modalHandle} />
+            <View style={S.modalHead}>
+              <TouchableOpacity onPress={() => setShowEdit(false)}>
+                <Text style={S.modalCancel}>Cancel</Text>
               </TouchableOpacity>
-              <Text style={styles.modalTitle}>Edit Profile</Text>
-              <TouchableOpacity style={styles.modalSaveBtn} onPress={handleSaveProfile}>
-                <Text style={styles.modalSaveBtnText}>Save</Text>
+              <Text style={S.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity style={S.modalSaveBtn} onPress={handleSave}>
+                <Text style={S.modalSaveTxt}>Save</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.modalBody}>
-              <Text style={styles.fieldLabel}>Display Name</Text>
-              <View style={[styles.inputWrapper, !!editNameError && styles.inputWrapperError]}>
+            <View style={S.modalBody}>
+
+              {/* Avatar preview in modal */}
+              <TouchableOpacity style={S.modalAvatar} onPress={handleAvatarPress} activeOpacity={0.85}>
+                <View style={S.modalAvatarRing}>
+                  {profileImage
+                    ? <Image source={{ uri: profileImage }} style={{ width: '100%', height: '100%', borderRadius: 36 }} />
+                    : <View style={S.modalAvatarFb}><Text style={S.modalAvatarIni}>{initials}</Text></View>
+                  }
+                </View>
+                <View style={S.modalCamBadge}><Ico name="images-outline" size={14} color={C.rose} /></View>
+                <Text style={S.modalAvatarHint}>Tap to change from gallery</Text>
+              </TouchableOpacity>
+
+              <Text style={S.fieldLbl}>Display Name</Text>
+              <View style={[S.inputWrap, !!editErr && S.inputWrapErr]}>
+                <Ico name="person-outline" size={16} color={C.sub} />
                 <TextInput
-                  style={styles.input} value={editName}
-                  onChangeText={(t) => { setEditName(t); if (t.trim()) setEditNameError(''); }}
-                  placeholder="Your name" placeholderTextColor={COLORS.pastelPink}
-                  autoCapitalize="words" autoFocus
+                  style={S.input}
+                  value={editName}
+                  onChangeText={t => { setEditName(t); if (t.trim()) setEditErr(''); }}
+                  placeholder="Your name"
+                  placeholderTextColor={C.faint}
+                  autoCapitalize="words"
+                  autoFocus
                 />
               </View>
-              {!!editNameError && <Text style={styles.errorText}>⚠ {editNameError}</Text>}
-              <Text style={styles.fieldLabel}>Email</Text>
-              <View style={[styles.inputWrapper, { opacity: 0.6 }]}>
-                <TextInput style={styles.input} value={userEmail} editable={false} placeholderTextColor={COLORS.pastelPink} />
+              {!!editErr && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6 }}>
+                  <Ico name="warning" size={13} color={C.error} />
+                  <Text style={S.errTxt}>{editErr}</Text>
+                </View>
+              )}
+
+              <Text style={S.fieldLbl}>Email</Text>
+              <View style={[S.inputWrap, { opacity: 0.55 }]}>
+                <Ico name="mail-outline" size={16} color={C.sub} />
+                <TextInput style={S.input} value={userEmail} editable={false} />
               </View>
-              <Text style={styles.fieldHint}>Email cannot be changed here. Use Privacy & Security → Change Account Details.</Text>
+              <Text style={S.hintTxt}>Email can be changed via Privacy & Security → Change Account Details.</Text>
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -699,96 +639,118 @@ export default function ProfileScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
-  scrollContent: { paddingBottom: 20 },
+// ═══════════════════════════════════════════════
+// STYLES
+// ═══════════════════════════════════════════════
+const S = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: C.bg },
+  scrollContent: { paddingBottom: 24 },
 
-  // Sub-screen header
-  subHeader: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 14,
-    backgroundColor: COLORS.white, borderBottomWidth: 1, borderBottomColor: COLORS.pinkChampagne,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 4,
-  },
-  subBackBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: COLORS.lavenderBlush, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
-  },
-  subBackArrow: { fontSize: 24, color: COLORS.watermelon, fontWeight: '300', lineHeight: 28 },
-  subHeaderTitle: { fontSize: 17, fontWeight: '800', color: COLORS.darkText },
+  // ── Sub-screen header ──
+  subHead:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: C.white, borderBottomWidth: 1, borderBottomColor: C.roseMist, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 3 },
+  subBack:  { width: 38, height: 38, borderRadius: 19, backgroundColor: C.roseMist, alignItems: 'center', justifyContent: 'center' },
+  subTitle: { fontSize: 17, fontWeight: '800', color: C.text },
 
-  // Hero
-  heroSection: {
-    backgroundColor: COLORS.watermelon, paddingTop: 10, paddingBottom: 60,
-    alignItems: 'center', position: 'relative', overflow: 'hidden',
+  // ── Hero ──
+  hero: {
+    backgroundColor: C.roseMist,
+    paddingTop: 14,
+    paddingBottom: 54,
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
   },
-  backBtn: {
-    position: 'absolute', top: 10, left: 18, width: 36, height: 36, borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center', zIndex: 10,
-  },
-  backArrow: { color: COLORS.white, fontSize: 26, fontWeight: '300', lineHeight: 30 },
-  heroTitle: { fontSize: 18, fontWeight: '800', color: COLORS.white, letterSpacing: 0.3, marginBottom: 20 },
-  heroBlob1: { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(255,255,255,0.1)', top: -80, right: -60 },
-  heroBlob2: { position: 'absolute', width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(255,255,255,0.08)', bottom: -30, left: -20 },
+  heroBlob1: { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: C.roseFog, opacity: 0.7, top: -80, right: -60 },
+  heroBlob2: { position: 'absolute', width: 140, height: 140, borderRadius: 70,  backgroundColor: C.roseCircle, opacity: 0.5, bottom: -30, left: -30 },
+  heroBlob3: { position: 'absolute', width: 80,  height: 80,  borderRadius: 40,  backgroundColor: C.roseFog, opacity: 0.6, top: 10, left: 30 },
+  heroBack:  { position: 'absolute', top: 16, left: 18, width: 38, height: 38, borderRadius: 19, backgroundColor: C.white, alignItems: 'center', justifyContent: 'center', zIndex: 10, ...cardShadow },
+  heroTitle: { fontSize: 18, fontWeight: '800', color: C.roseDark, letterSpacing: 0.2, marginBottom: 24 },
 
-  avatarWrapper: { position: 'relative', marginBottom: 4 },
-  avatarOuter: { width: 100, height: 100, borderRadius: 50, borderWidth: 4, borderColor: COLORS.white, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.25, shadowRadius: 12, elevation: 10 },
-  avatarImage: { width: '100%', height: '100%', resizeMode: 'cover' },
-  avatarFallback: { width: '100%', height: '100%', backgroundColor: COLORS.deepPink, alignItems: 'center', justifyContent: 'center' },
-  avatarInitials: { color: COLORS.white, fontSize: 34, fontWeight: '800' },
-  cameraBadge: { position: 'absolute', bottom: 2, right: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: COLORS.watermelon },
-  cameraBadgeIcon: { fontSize: 13 },
+  // Avatar
+  avatarWrap:    { position: 'relative', marginBottom: 8 },
+  avatarRing:    { width: 102, height: 102, borderRadius: 51, borderWidth: 4, borderColor: C.white, overflow: 'hidden', shadowColor: C.rose, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.25, shadowRadius: 14, elevation: 10 },
+  avatarImg:     { width: '100%', height: '100%', resizeMode: 'cover' },
+  avatarFallback:{ width: '100%', height: '100%', backgroundColor: C.rose, alignItems: 'center', justifyContent: 'center' },
+  avatarIni:     { color: C.white, fontSize: 34, fontWeight: '800' },
+  camBadge:      { position: 'absolute', bottom: 2, right: 2, width: 30, height: 30, borderRadius: 15, backgroundColor: C.rose, alignItems: 'center', justifyContent: 'center', borderWidth: 2.5, borderColor: C.white, shadowColor: C.rose, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 4, elevation: 5 },
+  avatarHint:    { fontSize: 11, color: C.sub, fontWeight: '600' },
 
   // Info card
   infoCard: {
-    backgroundColor: COLORS.white, marginHorizontal: 20, marginTop: -36,
-    borderRadius: 24, padding: 22, alignItems: 'center',
-    shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 8,
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne, zIndex: 10,
+    backgroundColor: C.white,
+    marginHorizontal: 20,
+    marginTop: -32,
+    borderRadius: 28,
+    padding: 24,
+    alignItems: 'center',
+    zIndex: 10,
+    ...cardShadow,
+    shadowOpacity: 0.14,
+    shadowRadius: 20,
+    elevation: 8,
   },
-  infoName: { fontSize: 22, fontWeight: '800', color: COLORS.darkText, marginBottom: 4 },
-  infoEmail: { fontSize: 13, color: COLORS.mutedText, marginBottom: 14 },
-  premiumBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: COLORS.lavenderBlush, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, marginBottom: 20, borderWidth: 1, borderColor: COLORS.pastelPink },
-  premiumDot: { fontSize: 10, color: COLORS.watermelon },
-  premiumText: { fontSize: 12, color: COLORS.watermelon, fontWeight: '700' },
+  infoName:  { fontSize: 22, fontWeight: '800', color: C.text, marginBottom: 4 },
+  infoEmail: { fontSize: 13, color: C.sub, marginBottom: 16 },
+  premBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: C.roseMist, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7, marginBottom: 22 },
+  premDot:   { width: 7, height: 7, borderRadius: 3.5, backgroundColor: C.green },
+  premTxt:   { fontSize: 12, color: C.rose, fontWeight: '700' },
   actionRow: { flexDirection: 'row', gap: 12, width: '100%' },
-  editProfileBtn: { flex: 1, backgroundColor: COLORS.watermelon, borderRadius: 14, paddingVertical: 13, alignItems: 'center', shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
-  editProfileBtnText: { color: COLORS.white, fontSize: 14, fontWeight: '800' },
-  logoutBtn: { flex: 1, backgroundColor: COLORS.white, borderRadius: 14, paddingVertical: 13, alignItems: 'center', borderWidth: 2, borderColor: COLORS.pastelPink },
-  logoutBtnText: { color: COLORS.darkText, fontSize: 14, fontWeight: '700' },
+  editBtn:   { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: C.rose, borderRadius: 16, paddingVertical: 14, shadowColor: C.rose, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.28, shadowRadius: 8, elevation: 5 },
+  editBtnTxt:{ color: C.white, fontSize: 14, fontWeight: '800' },
+  logoutBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: C.white, borderRadius: 16, paddingVertical: 14, borderWidth: 1.5, borderColor: C.roseFog },
+  logoutBtnTxt:{ color: C.sub, fontSize: 14, fontWeight: '700' },
 
   // Settings
-  settingsSection: { marginHorizontal: 20, marginTop: 28 },
-  settingsTitle: { fontSize: 17, fontWeight: '800', color: COLORS.watermelon, marginBottom: 14 },
-  settingsCard: { backgroundColor: COLORS.white, borderRadius: 20, borderWidth: 1.5, borderColor: COLORS.pinkChampagne, overflow: 'hidden', shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 3 },
-  settingsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 16 },
-  settingsRowBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.lavenderBlush },
-  settingsLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
-  settingsIconBadge: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.lavenderBlush, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: COLORS.pinkChampagne },
-  settingsIcon: { fontSize: 18 },
-  settingsLabel: { fontSize: 15, fontWeight: '700', color: COLORS.darkText, marginBottom: 2 },
-  settingsSub: { fontSize: 11, color: COLORS.mutedText },
-  settingsChevron: { fontSize: 20, color: COLORS.pastelPink },
+  settingsWrap: { marginHorizontal: 20, marginTop: 30 },
+  secTitle:     { fontSize: 17, fontWeight: '800', color: C.text, marginBottom: 14 },
+  settingsCard: { backgroundColor: C.white, borderRadius: 24, overflow: 'hidden', ...cardShadow },
+  settRow:      { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 17, gap: 14 },
+  settRowBorder:{ borderBottomWidth: 1, borderBottomColor: C.roseMist },
+  settIcoBg:    { width: 44, height: 44, borderRadius: 22, backgroundColor: C.roseMist, alignItems: 'center', justifyContent: 'center' },
+  settLabel:    { fontSize: 15, fontWeight: '700', color: C.text, marginBottom: 2 },
+  settSub:      { fontSize: 11, color: C.sub },
 
-  appInfoRow: { alignItems: 'center', marginTop: 24, gap: 4 },
-  appInfoText: { fontSize: 12, color: COLORS.mutedText },
+  // Footer
+  footer:    { alignItems: 'center', marginTop: 28, gap: 5 },
+  footerTxt: { fontSize: 12, color: C.faint, fontWeight: '500' },
 
-  // Edit modal
-  modalOverlay: { flex: 1, justifyContent: 'flex-end' },
-  modalBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.45)' },
-  modalSheet: { backgroundColor: COLORS.white, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingBottom: 24 },
-  sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: COLORS.pinkChampagne, alignSelf: 'center', marginTop: 12, marginBottom: 4 },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: COLORS.lavenderBlush },
-  modalCancelText: { fontSize: 15, color: COLORS.mutedText, fontWeight: '600' },
-  modalTitle: { fontSize: 17, fontWeight: '800', color: COLORS.darkText },
-  modalSaveBtn: { backgroundColor: COLORS.watermelon, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 8 },
-  modalSaveBtnText: { color: COLORS.white, fontWeight: '800', fontSize: 14 },
-  modalBody: { paddingHorizontal: 20, paddingTop: 16 },
-  fieldLabel: { fontSize: 13, fontWeight: '700', color: COLORS.darkText, marginBottom: 8, marginTop: 14 },
-  inputWrapper: { backgroundColor: COLORS.lavenderBlush, borderRadius: 14, borderWidth: 1.5, borderColor: COLORS.pastelPink, paddingHorizontal: 14 },
-  inputWrapperError: { borderColor: COLORS.error },
-  input: { fontSize: 15, color: COLORS.darkText, paddingVertical: 12 },
-  errorText: { fontSize: 12, color: COLORS.error, marginTop: 4, fontWeight: '500' },
-  fieldHint: { fontSize: 11, color: COLORS.mutedText, marginTop: 6, lineHeight: 16 },
+  // Install banner
+  installOverlay:  { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', padding: 28 },
+  installCard:     { backgroundColor: C.white, borderRadius: 28, padding: 28, width: '100%', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 24, elevation: 16 },
+  installIconWrap: { width: 68, height: 68, borderRadius: 34, backgroundColor: C.roseMist, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  installTitle:    { fontSize: 18, fontWeight: '800', color: C.text, marginBottom: 10, textAlign: 'center' },
+  installDesc:     { fontSize: 13, color: C.sub, textAlign: 'center', lineHeight: 20, marginBottom: 16 },
+  installCmd:      { backgroundColor: '#1E1E2E', borderRadius: 14, paddingHorizontal: 18, paddingVertical: 14, width: '100%', marginBottom: 12 },
+  installCmdTxt:   { fontSize: 13, color: '#F5A8B8', fontWeight: '700', fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace', textAlign: 'center' },
+  installStep:     { fontSize: 12, color: C.sub, textAlign: 'center', marginBottom: 22, lineHeight: 18 },
+  installBtn:      { backgroundColor: C.rose, borderRadius: 16, paddingVertical: 14, paddingHorizontal: 40, shadowColor: C.rose, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.28, shadowRadius: 8, elevation: 5 },
+  installBtnTxt:   { color: C.white, fontSize: 15, fontWeight: '800' },
+
+  // Edit modal     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)' },
+  modalSheet:  { backgroundColor: C.white, borderTopLeftRadius: 32, borderTopRightRadius: 32, paddingHorizontal: 22 },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: C.roseFog, alignSelf: 'center', marginTop: 14, marginBottom: 6 },
+  modalHead:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.roseMist, marginBottom: 8 },
+  modalCancel: { fontSize: 15, color: C.sub, fontWeight: '600' },
+  modalTitle:  { fontSize: 17, fontWeight: '800', color: C.text },
+  modalSaveBtn:{ backgroundColor: C.rose, borderRadius: 18, paddingHorizontal: 20, paddingVertical: 8 },
+  modalSaveTxt:{ color: C.white, fontWeight: '800', fontSize: 14 },
+  modalBody:   { paddingTop: 10 },
+
+  // Modal avatar picker
+  modalAvatar:    { alignItems: 'center', marginBottom: 22, paddingTop: 8 },
+  modalAvatarRing:{ width: 80, height: 80, borderRadius: 40, borderWidth: 3, borderColor: C.roseFog, overflow: 'hidden', marginBottom: 8 },
+  modalAvatarFb:  { width: '100%', height: '100%', backgroundColor: C.rose, alignItems: 'center', justifyContent: 'center' },
+  modalAvatarIni: { color: C.white, fontSize: 26, fontWeight: '800' },
+  modalCamBadge:  { position: 'absolute', bottom: 28, right: (width / 2) - 58, width: 26, height: 26, borderRadius: 13, backgroundColor: C.roseMist, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: C.white },
+  modalAvatarHint:{ fontSize: 12, color: C.rose, fontWeight: '700' },
+
+  // Fields
+  fieldLbl:   { fontSize: 13, fontWeight: '700', color: C.text, marginBottom: 8, marginTop: 16 },
+  inputWrap:  { flexDirection: 'row', alignItems: 'center', backgroundColor: C.roseMist, borderRadius: 14, borderWidth: 1.5, borderColor: C.roseFog, paddingHorizontal: 14, gap: 10 },
+  inputWrapErr:{ borderColor: C.error },
+  input:      { flex: 1, fontSize: 15, color: C.text, paddingVertical: 13 },
+  errTxt:     { fontSize: 12, color: C.error, fontWeight: '500' },
+  hintTxt:    { fontSize: 11, color: C.sub, marginTop: 7, lineHeight: 16 },
 });

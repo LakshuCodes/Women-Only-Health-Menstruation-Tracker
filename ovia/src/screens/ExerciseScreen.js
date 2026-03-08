@@ -12,18 +12,43 @@ import {
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// ── Vector Icon helper ──
+const Ico = ({ name, size = 20, color = '#E8748A' }) => (
+  <Ionicons name={name} size={size} color={color} />
+);
+
 
 const { width } = Dimensions.get('window');
 
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink: '#FFB3C6',
-  lightPink: '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon: '#FB6F92',
-  white: '#FFFFFF',
-  darkText: '#2D1B1E',
-  mutedText: '#9B6B78',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 export const ALL_MODULES = [
@@ -32,9 +57,9 @@ export const ALL_MODULES = [
     title: 'Period Relief',
     subtitle: 'Ease cramps & bloating',
     description: 'Gentle stretches and yoga poses specifically designed to relieve menstrual cramps, reduce bloating, and ease lower back pain during your period.',
-    emoji: '🩸',
-    bg: '#FFE5EC',
-    accent: '#FB6F92',
+    icon: 'water',
+    bg: '#FDE8ED',
+    accent: '#E8748A',
     videoCount: 8,
     category: 'Period',
     searchQuery: 'period cramps relief yoga exercises',
@@ -44,7 +69,7 @@ export const ALL_MODULES = [
     title: 'PCOS & PCOD Yoga',
     subtitle: 'Balance hormones naturally',
     description: 'Targeted yoga and low-impact workouts to help manage PCOS/PCOD symptoms, regulate hormones, and reduce insulin resistance.',
-    emoji: '🧘',
+    icon: 'body',
     bg: '#F3E5F5',
     accent: '#AB47BC',
     videoCount: 12,
@@ -56,7 +81,7 @@ export const ALL_MODULES = [
     title: 'Pregnancy Safe',
     subtitle: 'Gentle prenatal workouts',
     description: 'Safe and effective prenatal exercises approved for all trimesters. Strengthen your body and prepare for childbirth.',
-    emoji: '🤰',
+    icon: 'heart-circle',
     bg: '#E8F5E9',
     accent: '#4CAF50',
     videoCount: 10,
@@ -68,7 +93,7 @@ export const ALL_MODULES = [
     title: 'Wall Pilates',
     subtitle: 'Core strength & posture',
     description: 'Use the wall for support and resistance in these pilates routines that target core strength, posture, and flexibility.',
-    emoji: '🏋️',
+    icon: 'barbell',
     bg: '#FFF3E0',
     accent: '#FF9800',
     videoCount: 9,
@@ -80,7 +105,7 @@ export const ALL_MODULES = [
     title: 'Weight Loss',
     subtitle: 'Burn fat gently',
     description: 'Low-impact cardio and strength workouts designed specifically for women to lose weight safely without stressing the body.',
-    emoji: '🔥',
+    icon: 'flame',
     bg: '#FCE4EC',
     accent: '#E91E63',
     videoCount: 15,
@@ -92,7 +117,7 @@ export const ALL_MODULES = [
     title: 'Chair Yoga',
     subtitle: 'Seated mindful movement',
     description: 'Accessible yoga routines you can do seated in a chair — perfect for office breaks, mobility issues, or recovery days.',
-    emoji: '🪑',
+    icon: 'accessibility',
     bg: '#E8EAF6',
     accent: '#5C6BC0',
     videoCount: 7,
@@ -104,7 +129,7 @@ export const ALL_MODULES = [
     title: 'Stretching',
     subtitle: 'Flexibility & recovery',
     description: 'Full-body stretching routines to improve flexibility, reduce muscle soreness, and promote relaxation after workouts.',
-    emoji: '🙆',
+    icon: 'happy',
     bg: '#E0F7FA',
     accent: '#00ACC1',
     videoCount: 11,
@@ -116,7 +141,7 @@ export const ALL_MODULES = [
     title: 'Postpartum Recovery',
     subtitle: 'Heal & rebuild strength',
     description: 'Gentle exercises to help new moms recover after childbirth, strengthen the pelvic floor, and rebuild core stability.',
-    emoji: '👶',
+    icon: 'people',
     bg: '#F9FBE7',
     accent: '#9CCC65',
     videoCount: 8,
@@ -128,7 +153,7 @@ export const ALL_MODULES = [
     title: 'Endometriosis Care',
     subtitle: 'Pain management movement',
     description: 'Specially curated low-impact exercises to help manage endometriosis pain, improve circulation, and reduce inflammation.',
-    emoji: '💜',
+    icon: 'heart',
     bg: '#F8F0FF',
     accent: '#9C27B0',
     videoCount: 6,
@@ -140,7 +165,7 @@ export const ALL_MODULES = [
     title: 'Stress & Anxiety',
     subtitle: 'Calm your nervous system',
     description: 'Breathwork, gentle yoga, and mindfulness movement to reduce cortisol, calm anxiety, and balance the nervous system.',
-    emoji: '🧠',
+    icon: 'bulb',
     bg: '#E3F2FD',
     accent: '#1E88E5',
     videoCount: 10,
@@ -150,7 +175,7 @@ export const ALL_MODULES = [
 ];
 
 const CATEGORIES = [
-  { key: 'All',           label: '✦ All' },
+  { key: 'All',           label: 'All' },
   { key: 'Period',        label: 'Period' },
   { key: 'PCOS',          label: 'PCOS' },
   { key: 'Pregnancy',     label: 'Pregnancy' },
@@ -188,9 +213,9 @@ export default function ExerciseScreen({ navigation }) {
       <View style={[styles.moduleBanner, { backgroundColor: mod.accent + '22' }]}>
         <View style={[styles.bannerBlob1, { backgroundColor: mod.accent + '18' }]} />
         <View style={[styles.bannerBlob2, { backgroundColor: mod.accent + '22' }]} />
-        <Text style={styles.bannerEmoji}>{mod.emoji}</Text>
+        <Ico name={mod.icon} size={54} color={mod.accent} />
         <View style={[styles.videoBadge, { backgroundColor: mod.accent }]}>
-          <Text style={styles.videoBadgeText}>▶ {mod.videoCount} videos</Text>
+          <View style={{flexDirection:"row",alignItems:"center",gap:3}}><Ico name="play" size={10} color={COLORS.watermelon??'#E8748A'}/><Text style={styles.videoBadgeText}>{mod.videoCount} videos</Text></View>
         </View>
       </View>
 
@@ -210,7 +235,7 @@ export default function ExerciseScreen({ navigation }) {
           onPress={() => navigation.navigate('ExerciseDetail', { module: mod })}
           activeOpacity={0.85}
         >
-          <Text style={styles.startBtnText}>Start Module ▶</Text>
+          <View style={{flexDirection:"row",alignItems:"center",gap:6}}><Text style={styles.startBtnText}>Start Module</Text><Ico name="play" size={14} color="#FFFFFF"/></View>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -218,7 +243,7 @@ export default function ExerciseScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg || '#FDF0F3'} />
 
       {/* Blobs */}
       <View style={styles.blob1} />
@@ -238,7 +263,7 @@ export default function ExerciseScreen({ navigation }) {
 
       {/* ── SEARCH ── */}
       <View style={styles.searchBar}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Ico name="search" size={18} color={COLORS.mutedText ?? "#8F6470"} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search exercises..."
@@ -248,7 +273,7 @@ export default function ExerciseScreen({ navigation }) {
         />
         {searchText.length > 0 && (
           <TouchableOpacity onPress={() => setSearchText('')}>
-            <Text style={styles.clearSearch}>✕</Text>
+            <Ico name="close" size={16} color={COLORS.mutedText ?? "#8F6470"} />
           </TouchableOpacity>
         )}
       </View>
@@ -281,7 +306,7 @@ export default function ExerciseScreen({ navigation }) {
       {/* ── MODULE LIST ── */}
       {filtered.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyEmoji}>🔍</Text>
+          <Ico name="search" size={44} color={COLORS.pastelPink ?? "#F5A8B8"} />
           <Text style={styles.emptyTitle}>No modules found</Text>
           <Text style={styles.emptySub}>Try a different search or category</Text>
         </View>
@@ -300,8 +325,8 @@ export default function ExerciseScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
-  blob1: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: COLORS.pinkChampagne, opacity: 0.35, top: -70, right: -70 },
+  safeArea: { flex: 1, backgroundColor: COLORS.bg || '#FDF0F3' },
+  blob1: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: '#FAD4DC', opacity: 0.35, top: -70, right: -70 },
   blob2: { position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: COLORS.pastelPink, opacity: 0.2, bottom: 100, left: -50 },
 
   // Header
@@ -313,9 +338,9 @@ const styles = StyleSheet.create({
   backBtn: {
     backgroundColor: COLORS.white, borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 8,
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
+    borderWidth: 1.5, borderColor: '#FAD4DC',
   },
-  backArrow: { fontSize: 13, color: COLORS.watermelon, fontWeight: '700' },
+  backArrow: { fontSize: 13, color: '#E8748A', fontWeight: '700' },
   headerCenter: { alignItems: 'center' },
   headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.darkText },
   headerSub: { fontSize: 11, color: COLORS.mutedText, fontWeight: '500' },
@@ -325,7 +350,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: COLORS.white, borderRadius: 16,
     marginHorizontal: 20, paddingHorizontal: 14, paddingVertical: 10,
-    borderWidth: 1.5, borderColor: COLORS.pastelPink, marginBottom: 12,
+    borderWidth: 1.5, borderColor: '#F5A8B8', marginBottom: 12,
   },
   searchIcon: { fontSize: 16, marginRight: 8 },
   searchInput: { flex: 1, fontSize: 14, color: COLORS.darkText },
@@ -354,21 +379,21 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: COLORS.white,
     borderWidth: 1.5,
-    borderColor: COLORS.pastelPink,
+    borderColor: '#F5A8B8',
     marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    shadowColor: COLORS.pastelPink,
+    shadowColor: '#D8808E',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.15,
     shadowRadius: 3,
     elevation: 2,
   },
   chipActive: {
-    backgroundColor: COLORS.watermelon,
-    borderColor: COLORS.watermelon,
-    shadowColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
+    borderColor: '#E8748A',
+    shadowColor: '#D06070',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,

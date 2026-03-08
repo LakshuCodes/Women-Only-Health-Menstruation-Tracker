@@ -5,7 +5,21 @@ import {
   TextInput, Linking, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// ── Vector Icon helper ──
+const Ico = ({ name, size = 20, color = '#E8748A' }) => (
+  <Ionicons name={name} size={size} color={color} />
+);
+
 import Svg, { Path, Circle, Rect, Line, Polyline } from 'react-native-svg';
+// ── Bell SVG Icon ──
+const BellIcon = ({ color = '#E8748A', size = 22 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <Path d="M13.73 21a2 2 0 0 1-3.46 0" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
+
 
 // ── Nav Icons (identical to all other screens) ──
 const DashboardIcon = ({ color, size = 28 }) => (
@@ -63,18 +77,33 @@ const { width } = Dimensions.get('window');
 const CARD_W = (width - 52) / 2;
 
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink:    '#FFB3C6',
-  lightPink:     '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon:    '#FB6F92',
-  white:         '#FFFFFF',
-  darkText:      '#2D1B1E',
-  mutedText:     '#9B6B78',
-  navInactive:   '#A0A0B0',
-  amazon:        '#FF9900',
-  flipkart:      '#2874F0',
-  star:          '#FFB300',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 // ── Icon components ──
@@ -116,14 +145,14 @@ const openFlipkart = (query) => {
 
 // ── Category data ──
 const CATEGORIES = [
-  { key: 'all',        label: 'All',           emoji: '✨' },
-  { key: 'pads',       label: 'Pads',          emoji: '🩺' },
-  { key: 'tampons',    label: 'Tampons',        emoji: '🌿' },
-  { key: 'cups',       label: 'Menstrual Cups', emoji: '🫙' },
-  { key: 'cramps',     label: 'Cramp Relief',   emoji: '💊' },
-  { key: 'skincare',   label: 'Skincare',       emoji: '🌸' },
-  { key: 'wellness',   label: 'Wellness',       emoji: '🧘' },
-  { key: 'intimate',   label: 'Intimate Care',  emoji: '🌺' },
+  { key: 'all',        label: 'All',           icon: 'apps' },
+  { key: 'pads',       label: 'Pads',          icon: 'shield-checkmark' },
+  { key: 'tampons',    label: 'Tampons',        icon: 'leaf' },
+  { key: 'cups',       label: 'Menstrual Cups', icon: 'beaker' },
+  { key: 'cramps',     label: 'Cramp Relief',   icon: 'medical' },
+  { key: 'skincare',   label: 'Skincare',       icon: 'flower' },
+  { key: 'wellness',   label: 'Wellness',       icon: 'body' },
+  { key: 'intimate',   label: 'Intimate Care',  icon: 'heart' },
 ];
 
 // ── Product data ──
@@ -131,7 +160,7 @@ const PRODUCTS = [
   // Pads
   {
     id: '1', category: 'pads',
-    emoji: '🌸', name: 'Whisper Ultra Soft XL',
+    icon: 'flower', name: 'Whisper Ultra Soft XL',
     brand: 'Whisper', price: '₹189', originalPrice: '₹240',
     rating: 4.5, reviews: 12400, tag: 'Best Seller',
     tagColor: '#E91E63', desc: 'Ultra soft wings, 8hr protection',
@@ -140,7 +169,7 @@ const PRODUCTS = [
   },
   {
     id: '2', category: 'pads',
-    emoji: '🩷', name: 'Stayfree Secure XL',
+    icon: 'heart', name: 'Stayfree Secure XL',
     brand: 'Stayfree', price: '₹165', originalPrice: '₹200',
     rating: 4.3, reviews: 8700, tag: 'Organic',
     tagColor: '#4CAF50', desc: 'Cottony soft, overnight protection',
@@ -149,7 +178,7 @@ const PRODUCTS = [
   },
   {
     id: '3', category: 'pads',
-    emoji: '💚', name: 'Sirona Organic Pads',
+    icon: 'leaf', name: 'Sirona Organic Pads',
     brand: 'Sirona', price: '₹299', originalPrice: '₹349',
     rating: 4.7, reviews: 5200, tag: '100% Organic',
     tagColor: '#4CAF50', desc: 'Chemical-free, biodegradable',
@@ -158,7 +187,7 @@ const PRODUCTS = [
   },
   {
     id: '4', category: 'pads',
-    emoji: '🌙', name: 'Sofy Bodyfit Night',
+    icon: 'moon', name: 'Sofy Bodyfit Night',
     brand: 'Sofy', price: '₹149', originalPrice: '₹180',
     rating: 4.2, reviews: 6100, tag: 'Night Use',
     tagColor: '#3F51B5', desc: 'Extra long, leak-proof sides',
@@ -168,7 +197,7 @@ const PRODUCTS = [
   // Tampons
   {
     id: '5', category: 'tampons',
-    emoji: '🌿', name: 'Tampax Pearl Regular',
+    icon: 'leaf-outline', name: 'Tampax Pearl Regular',
     brand: 'Tampax', price: '₹450', originalPrice: '₹550',
     rating: 4.4, reviews: 3200, tag: 'Top Rated',
     tagColor: '#9C27B0', desc: 'LeakGuard braid, smooth insertion',
@@ -177,7 +206,7 @@ const PRODUCTS = [
   },
   {
     id: '6', category: 'tampons',
-    emoji: '🍃', name: 'Sirona Applicator Tampons',
+    icon: 'leaf-outline', name: 'Sirona Applicator Tampons',
     brand: 'Sirona', price: '₹399', originalPrice: '₹479',
     rating: 4.5, reviews: 2800, tag: 'New',
     tagColor: '#00BCD4', desc: 'Easy applicator, 8hr comfort',
@@ -187,7 +216,7 @@ const PRODUCTS = [
   // Menstrual cups
   {
     id: '7', category: 'cups',
-    emoji: '🫙', name: 'Sirona Menstrual Cup',
+    icon: 'beaker', name: 'Sirona Menstrual Cup',
     brand: 'Sirona', price: '₹549', originalPrice: '₹799',
     rating: 4.6, reviews: 9100, tag: 'Eco-Friendly',
     tagColor: '#4CAF50', desc: 'Medical grade silicone, reusable',
@@ -196,7 +225,7 @@ const PRODUCTS = [
   },
   {
     id: '8', category: 'cups',
-    emoji: '💜', name: 'Pee Safe Menstrual Cup',
+    icon: 'heart-circle', name: 'Pee Safe Menstrual Cup',
     brand: 'Pee Safe', price: '₹499', originalPrice: '₹699',
     rating: 4.5, reviews: 7600, tag: 'Best Value',
     tagColor: '#FF9800', desc: '12hr protection, soft & flexible',
@@ -206,7 +235,7 @@ const PRODUCTS = [
   // Cramp relief
   {
     id: '9', category: 'cramps',
-    emoji: '🔥', name: 'Soothe Period Patch',
+    icon: 'flame', name: 'Soothe Period Patch',
     brand: 'Sirona', price: '₹249', originalPrice: '₹299',
     rating: 4.4, reviews: 4400, tag: 'Drug-Free',
     tagColor: '#F44336', desc: 'Heat therapy, stick-on patch',
@@ -215,7 +244,7 @@ const PRODUCTS = [
   },
   {
     id: '10', category: 'cramps',
-    emoji: '💊', name: 'Meftal Spas Tablets',
+    icon: 'medical', name: 'Meftal Spas Tablets',
     brand: 'Meftal', price: '₹89', originalPrice: '₹120',
     rating: 4.3, reviews: 18200, tag: '#1 Period Pain',
     tagColor: '#E91E63', desc: 'Fast cramp & spasm relief',
@@ -224,7 +253,7 @@ const PRODUCTS = [
   },
   {
     id: '11', category: 'cramps',
-    emoji: '🌿', name: 'Gynoveda Period Wellness',
+    icon: 'leaf-outline', name: 'Gynoveda Period Wellness',
     brand: 'Gynoveda', price: '₹699', originalPrice: '₹999',
     rating: 4.5, reviews: 6800, tag: 'Ayurvedic',
     tagColor: '#8BC34A', desc: 'Ayurvedic herbs, hormone balance',
@@ -233,7 +262,7 @@ const PRODUCTS = [
   },
   {
     id: '12', category: 'cramps',
-    emoji: '🛁', name: 'Bengay Pain Relief Cream',
+    icon: 'fitness', name: 'Bengay Pain Relief Cream',
     brand: 'Bengay', price: '₹199', originalPrice: '₹250',
     rating: 4.1, reviews: 3100, tag: 'Topical',
     tagColor: '#FF5722', desc: 'Cooling menthol relief cream',
@@ -243,7 +272,7 @@ const PRODUCTS = [
   // Skincare
   {
     id: '13', category: 'skincare',
-    emoji: '🌸', name: 'Plum Hormonal Acne Gel',
+    icon: 'flower', name: 'Plum Hormonal Acne Gel',
     brand: 'Plum', price: '₹395', originalPrice: '₹450',
     rating: 4.4, reviews: 5600, tag: 'Hormone Acne',
     tagColor: '#9C27B0', desc: 'Targets cycle-related breakouts',
@@ -252,7 +281,7 @@ const PRODUCTS = [
   },
   {
     id: '14', category: 'skincare',
-    emoji: '✨', name: 'Dot & Key Body Butter',
+    icon: 'sparkles', name: 'Dot & Key Body Butter',
     brand: 'Dot & Key', price: '₹449', originalPrice: '₹549',
     rating: 4.6, reviews: 7200, tag: 'Self-Care',
     tagColor: '#FF9800', desc: 'Period bloat & skin nourishment',
@@ -262,7 +291,7 @@ const PRODUCTS = [
   // Wellness
   {
     id: '15', category: 'wellness',
-    emoji: '💊', name: 'Iron + Folic Acid Tablets',
+    icon: 'medical', name: 'Iron + Folic Acid Tablets',
     brand: 'TrueBasics', price: '₹349', originalPrice: '₹499',
     rating: 4.5, reviews: 11200, tag: 'Daily Essential',
     tagColor: '#F44336', desc: 'Replenish iron lost during period',
@@ -271,7 +300,7 @@ const PRODUCTS = [
   },
   {
     id: '16', category: 'wellness',
-    emoji: '🌺', name: 'Wellbeing Nutrition Magnesium',
+    icon: 'rose', name: 'Wellbeing Nutrition Magnesium',
     brand: 'WN', price: '₹699', originalPrice: '₹899',
     rating: 4.6, reviews: 4300, tag: 'PMS Relief',
     tagColor: '#673AB7', desc: 'Reduces PMS & muscle cramps',
@@ -281,7 +310,7 @@ const PRODUCTS = [
   // Intimate care
   {
     id: '17', category: 'intimate',
-    emoji: '🌺', name: 'Pee Safe Intimate Wash',
+    icon: 'rose', name: 'Pee Safe Intimate Wash',
     brand: 'Pee Safe', price: '₹299', originalPrice: '₹399',
     rating: 4.5, reviews: 8900, tag: 'pH Balanced',
     tagColor: '#E91E63', desc: 'Gentle, fragrance-free formula',
@@ -301,9 +330,9 @@ const PRODUCTS = [
 
 // ── Featured banner data ──
 const BANNERS = [
-  { id: '1', title: 'Period Essentials Kit', subtitle: 'Pads + Cramp relief + Wipes', emoji: '🌸', bg: '#FFE5EC', accent: '#FB6F92', query: 'period essentials kit women India' },
-  { id: '2', title: 'Switch to Organic', subtitle: 'Chemical-free period products', emoji: '🌿', bg: '#E8F5E9', accent: '#4CAF50', query: 'organic period products India' },
-  { id: '3', title: 'Menstrual Cup Starter', subtitle: 'Save money & the planet', emoji: '♻️', bg: '#E3F2FD', accent: '#1E88E5', query: 'menstrual cup starter kit India' },
+  { id: '1', title: 'Period Essentials Kit', subtitle: 'Pads + Cramp relief + Wipes', icon: 'flower', bg: '#FDE8ED', accent: '#E8748A', query: 'period essentials kit women India' },
+  { id: '2', title: 'Switch to Organic', subtitle: 'Chemical-free period products', icon: 'leaf', bg: '#E8F5E9', accent: '#4CAF50', query: 'organic period products India' },
+  { id: '3', title: 'Menstrual Cup Starter', subtitle: 'Save money & the planet', icon: 'refresh-circle', bg: '#E3F2FD', accent: '#1E88E5', query: 'menstrual cup starter kit India' },
 ];
 
 // ── Star rating component ──
@@ -379,7 +408,7 @@ export default function ShopScreen({ navigation }) {
 
       {/* Emoji thumbnail */}
       <View style={[styles.productThumb, { backgroundColor: p.tagColor + '18' }]}>
-        <Text style={styles.productEmoji}>{p.emoji}</Text>
+        <Ico name={p.icon} size={28} color={COLORS.watermelon ?? "#E8748A"} />
       </View>
 
       {/* Info */}
@@ -409,14 +438,14 @@ export default function ShopScreen({ navigation }) {
           onPress={() => openProduct(p, 'amazon')}
           activeOpacity={0.85}
         >
-          <Text style={styles.amazonBtnText}>🛒 Amazon</Text>
+          <View style={{flexDirection:"row",alignItems:"center",gap:6}}><Ico name="cart" size={14} color="#FFFFFF"/><Text style={styles.amazonBtnText}>Amazon</Text></View>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.flipkartBtn}
           onPress={() => openProduct(p, 'flipkart')}
           activeOpacity={0.85}
         >
-          <Text style={styles.flipkartBtnText}>⚡ Flipkart</Text>
+          <View style={{flexDirection:"row",alignItems:"center",gap:6}}><Ico name="flash" size={14} color="#FFFFFF"/><Text style={styles.flipkartBtnText}>Flipkart</Text></View>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -424,21 +453,21 @@ export default function ShopScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg || '#FDF0F3'} />
       <View style={styles.blob1} />
       <View style={styles.blob2} />
 
       {/* ── HEADER ── */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Shop 🛍️</Text>
+          <Text style={styles.headerTitle}>Shop</Text>
           <Text style={styles.headerSub}>Period & wellness essentials</Text>
         </View>
         <TouchableOpacity
           style={styles.bellBtn}
           onPress={() => navigation.navigate('Notifications')}
         >
-          <Text style={{ fontSize: 18 }}>🔔</Text>
+          <BellIcon color='#E8748A' size={22} />
           <View style={styles.bellDot} />
         </TouchableOpacity>
       </View>
@@ -455,7 +484,7 @@ export default function ShopScreen({ navigation }) {
         />
         {searchText.length > 0 && (
           <TouchableOpacity onPress={() => setSearchText('')}>
-            <Text style={{ color: COLORS.mutedText, fontSize: 14, paddingLeft: 8 }}>✕</Text>
+            <Ico name="close" size={16} color={COLORS.mutedText} />
           </TouchableOpacity>
         )}
       </View>
@@ -486,7 +515,7 @@ export default function ShopScreen({ navigation }) {
                 >
                   <View style={[styles.bannerBlobLeft, { backgroundColor: b.accent + '25' }]} />
                   <View style={[styles.bannerBlobRight, { backgroundColor: b.accent + '18' }]} />
-                  <Text style={styles.bannerEmoji}>{b.emoji}</Text>
+                  <Ico name={b.icon} size={46} color={COLORS.watermelon} />
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.bannerTitle, { color: b.accent }]}>{b.title}</Text>
                     <Text style={styles.bannerSub}>{b.subtitle}</Text>
@@ -522,7 +551,7 @@ export default function ShopScreen({ navigation }) {
                 onPress={() => setActiveCategory(c.key)}
                 activeOpacity={0.75}
               >
-                <Text style={styles.chipEmoji}>{c.emoji}</Text>
+                <Ico name={c.icon} size={13} color={isActive ? "#FFFFFF" : COLORS.watermelon} />
                 <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{c.label}</Text>
               </TouchableOpacity>
             );
@@ -539,14 +568,14 @@ export default function ShopScreen({ navigation }) {
               CATEGORIES.find(c => c.key === activeCategory)?.label + ' women India'
             )}
           >
-            <Text style={styles.amazonAllBtnText}>🛒 See all on Amazon</Text>
+            <View style={{flexDirection:"row",alignItems:"center",gap:6}}><Ico name="cart" size={16} color="#FFFFFF"/><Text style={styles.amazonAllBtnText}>See all on Amazon</Text></View>
           </TouchableOpacity>
         </View>
 
         {/* ── PRODUCT GRID ── */}
         {filtered.length === 0 ? (
           <View style={styles.empty}>
-            <Text style={{ fontSize: 44, marginBottom: 12 }}>🔍</Text>
+            <View style={{marginBottom:12}}><Ico name="search" size={44} color={COLORS.pastelPink}/></View>
             <Text style={styles.emptyTitle}>No products found</Text>
             <Text style={styles.emptySub}>Try a different search or category</Text>
           </View>
@@ -559,7 +588,7 @@ export default function ShopScreen({ navigation }) {
         {/* ── DISCLAIMER ── */}
         <View style={styles.disclaimer}>
           <Text style={styles.disclaimerText}>
-            🔗 Ovia links to Amazon & Flipkart for your convenience. We don't sell products directly. Prices & availability may vary.
+            Ovia links to Amazon & Flipkart for your convenience. We don't sell products directly. Prices & availability may vary.
           </Text>
         </View>
 
@@ -593,19 +622,19 @@ export default function ShopScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
-  blob1: { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: COLORS.pinkChampagne, opacity: 0.35, top: -60, right: -60 },
+  safeArea: { flex: 1, backgroundColor: COLORS.bg || '#FDF0F3' },
+  blob1: { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: '#FAD4DC', opacity: 0.35, top: -60, right: -60 },
   blob2: { position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: COLORS.pastelPink, opacity: 0.2, bottom: 120, left: -40 },
 
   // Header
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10 },
   headerTitle: { fontSize: 24, fontWeight: '800', color: COLORS.darkText },
   headerSub: { fontSize: 12, color: COLORS.mutedText, fontWeight: '500', marginTop: 2 },
-  bellBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: COLORS.pinkChampagne, position: 'relative' },
-  bellDot: { position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.watermelon, borderWidth: 1.5, borderColor: COLORS.white },
+  bellBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#FAD4DC', position: 'relative' },
+  bellDot: { position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: 4, backgroundColor: '#E8748A', borderWidth: 1.5, borderColor: COLORS.white },
 
   // Search
-  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 16, marginHorizontal: 20, marginBottom: 14, paddingHorizontal: 14, paddingVertical: 11, borderWidth: 1.5, borderColor: COLORS.pastelPink },
+  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 16, marginHorizontal: 20, marginBottom: 14, paddingHorizontal: 14, paddingVertical: 11, borderWidth: 1.5, borderColor: '#F5A8B8' },
   searchInput: { flex: 1, fontSize: 13, color: COLORS.darkText, marginLeft: 8 },
 
   scrollContent: { paddingHorizontal: 20, paddingTop: 4 },
@@ -622,13 +651,13 @@ const styles = StyleSheet.create({
   bannerBtnText: { color: COLORS.white, fontSize: 11, fontWeight: '800' },
   bannerDots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 10 },
   bannerDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.pastelPink },
-  bannerDotActive: { backgroundColor: COLORS.watermelon, width: 18, borderRadius: 3 },
+  bannerDotActive: { backgroundColor: '#E8748A', width: 18, borderRadius: 3 },
 
   // Category chips
   chipsList: { flexGrow: 0, marginBottom: 16 },
   chipsContainer: { paddingVertical: 4, paddingRight: 20 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 50, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.pastelPink, marginRight: 10 },
-  chipActive: { backgroundColor: COLORS.watermelon, borderColor: COLORS.watermelon, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 50, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: '#F5A8B8', marginRight: 10 },
+  chipActive: { backgroundColor: COLORS.rose || '#E8748A', borderColor: COLORS.rose || '#E8748A', shadowColor: '#D06070', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
   chipEmoji: { fontSize: 13 },
   chipText: { fontSize: 12, fontWeight: '600', color: COLORS.mutedText },
   chipTextActive: { color: COLORS.white, fontWeight: '700' },
@@ -647,7 +676,7 @@ const styles = StyleSheet.create({
     width: CARD_W,
     backgroundColor: COLORS.white,
     borderRadius: 20, padding: 14,
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
+    borderWidth: 1.5, borderColor: '#FAD4DC',
     shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08, shadowRadius: 10, elevation: 4,
     position: 'relative', overflow: 'hidden',
@@ -681,7 +710,7 @@ const styles = StyleSheet.create({
   emptySub: { fontSize: 13, color: COLORS.mutedText },
 
   // Disclaimer
-  disclaimer: { backgroundColor: COLORS.white, borderRadius: 14, padding: 14, marginTop: 8, borderWidth: 1, borderColor: COLORS.pinkChampagne },
+  disclaimer: { backgroundColor: COLORS.white, borderRadius: 14, padding: 14, marginTop: 8, borderWidth: 1, borderColor: '#FAD4DC' },
   disclaimerText: { fontSize: 11, color: COLORS.mutedText, lineHeight: 16, textAlign: 'center' },
 
   // ── Bottom Nav (matches all other screens exactly) ──
@@ -715,7 +744,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 3,
     borderRadius: 2,
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
   },
   navActiveCircle: {
     position: 'absolute',
@@ -723,7 +752,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.lavenderBlush,
+    backgroundColor: COLORS.roseCircle || '#FADADF',
     zIndex: -1,
   },
   navLabel: {
@@ -733,5 +762,5 @@ const styles = StyleSheet.create({
     marginTop: 1,
     letterSpacing: 0.2,
   },
-  navLabelActive: { color: COLORS.watermelon, fontWeight: '700' },
+  navLabelActive: { color: '#E8748A', fontWeight: '700' },
 });

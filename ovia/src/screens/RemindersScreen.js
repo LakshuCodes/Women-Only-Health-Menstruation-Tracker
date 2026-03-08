@@ -15,27 +15,51 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// ── Vector Icon helper ──
+const Ico = ({ name, size = 20, color = '#E8748A' }) => (
+  <Ionicons name={name} size={size} color={color} />
+);
+
 import { getReminders, setReminders } from './HomeScreen';
 
 const { width } = Dimensions.get('window');
 
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink: '#FFB3C6',
-  lightPink: '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon: '#FB6F92',
-  white: '#FFFFFF',
-  darkText: '#2D1B1E',
-  mutedText: '#9B6B78',
-  error: '#E53935',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 // ── Chip color options ──
 const CHIP_COLORS = [
-  { label: 'Pink', value: '#FFB3C6' },
-  { label: 'Champagne', value: '#FFC2D1' },
-  { label: 'Light Pink', value: '#FF8FAB' },
+  { label: 'Pink', value: '#F5A8B8' },
+  { label: 'Champagne', value: '#FAD4DC' },
+  { label: 'Light Pink', value: '#F5A8B8' },
   { label: 'Peach', value: '#FFCCBC' },
   { label: 'Lavender', value: '#E1BEE7' },
   { label: 'Sky', value: '#B3E5FC' },
@@ -43,8 +67,8 @@ const CHIP_COLORS = [
 
 // ── Icon options ──
 const ICON_OPTIONS = [
-  '💊', '🩺', '🏃', '🧘', '💧', '🍎', '🌙', '⏰',
-  '🩸', '🧴', '💉', '🫀', '🥗', '🏋️', '📋', '🌸',
+  'medical', 'pulse', 'walk', 'body', 'water', 'nutrition', 'moon', 'alarm',
+  'fitness', 'flask', 'thermometer', 'heart-circle', 'restaurant', 'barbell', 'list', 'flower',
 ];
 
 // ── Repeat options ──
@@ -57,7 +81,7 @@ export default function RemindersScreen({ navigation }) {
   // Form state
   const [title, setTitle] = useState('');
   const [time, setTime] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState('💊');
+  const [selectedIcon, setSelectedIcon] = useState('medical');
   const [selectedColor, setSelectedColor] = useState(CHIP_COLORS[0].value);
   const [selectedRepeat, setSelectedRepeat] = useState('Once');
   const [titleError, setTitleError] = useState('');
@@ -76,7 +100,7 @@ export default function RemindersScreen({ navigation }) {
   const resetForm = () => {
     setTitle('');
     setTime('');
-    setSelectedIcon('💊');
+    setSelectedIcon('medical');
     setSelectedColor(CHIP_COLORS[0].value);
     setSelectedRepeat('Once');
     setTitleError('');
@@ -122,7 +146,7 @@ export default function RemindersScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg || '#FDF0F3'} />
 
       {/* Blobs */}
       <View style={styles.blobTopRight} />
@@ -150,7 +174,7 @@ export default function RemindersScreen({ navigation }) {
         {/* Empty state */}
         {reminders.length === 0 && (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>⏰</Text>
+<Ico name="alarm-outline" size={52} color={COLORS.pastelPink} />
             <Text style={styles.emptyTitle}>No reminders yet</Text>
             <Text style={styles.emptySub}>Tap "＋ New" to create your first reminder</Text>
             <TouchableOpacity style={styles.emptyBtn} onPress={() => setShowModal(true)}>
@@ -169,16 +193,16 @@ export default function RemindersScreen({ navigation }) {
             <View style={[styles.cardAccent, { backgroundColor: r.color }]} />
 
             <View style={[styles.iconBadge, { backgroundColor: r.color + '60' }]}>
-              <Text style={styles.cardIcon}>{r.icon}</Text>
+              <Ico name={r.icon || "medical"} size={24} color={r.color || COLORS.watermelon} />
             </View>
 
             <View style={styles.cardInfo}>
               <Text style={styles.cardTitle}>{r.title}</Text>
               <View style={styles.cardMetaRow}>
-                <Text style={styles.cardTime}>🕐 {r.time}</Text>
+                <View style={{flexDirection:"row",alignItems:"center",gap:4}}><Ico name="time-outline" size={13} color={COLORS.mutedText}/><Text style={styles.cardTime}>{r.time}</Text></View>
                 {r.repeat && r.repeat !== 'Once' && (
                   <View style={styles.repeatBadge}>
-                    <Text style={styles.repeatBadgeText}>🔁 {r.repeat}</Text>
+                    <View style={{flexDirection:"row",alignItems:"center",gap:3}}><Ico name="repeat" size={12} color={COLORS.watermelon}/><Text style={styles.repeatBadgeText}>{r.repeat}</Text></View>
                   </View>
                 )}
               </View>
@@ -189,7 +213,7 @@ export default function RemindersScreen({ navigation }) {
               onPress={() => handleDelete(r.id)}
               activeOpacity={0.7}
             >
-              <Text style={styles.deleteBtnText}>🗑</Text>
+<Ico name="trash-outline" size={18} color={COLORS.error || "#E53935"} />
             </TouchableOpacity>
           </Animated.View>
         ))}
@@ -248,7 +272,7 @@ export default function RemindersScreen({ navigation }) {
                   autoCapitalize="sentences"
                 />
               </View>
-              {!!titleError && <Text style={styles.errorText}>⚠ {titleError}</Text>}
+              {!!titleError && <View style={{flexDirection:"row",alignItems:"center",gap:4}}><Ico name="warning" size={14} color="#E53935"/><Text style={styles.errorText}>{titleError}</Text></View>}
 
               {/* Time input */}
               <Text style={styles.fieldLabel}>Time *</Text>
@@ -261,7 +285,7 @@ export default function RemindersScreen({ navigation }) {
                   onChangeText={(t) => { setTime(t); if (t.trim()) setTimeError(''); }}
                 />
               </View>
-              {!!timeError && <Text style={styles.errorText}>⚠ {timeError}</Text>}
+              {!!timeError && <View style={{flexDirection:"row",alignItems:"center",gap:4}}><Ico name="warning" size={14} color="#E53935"/><Text style={styles.errorText}>{timeError}</Text></View>}
 
               {/* Icon picker */}
               <Text style={styles.fieldLabel}>Choose Icon</Text>
@@ -272,7 +296,7 @@ export default function RemindersScreen({ navigation }) {
                     style={[styles.iconOption, selectedIcon === icon && styles.iconOptionSelected]}
                     onPress={() => setSelectedIcon(icon)}
                   >
-                    <Text style={styles.iconOptionEmoji}>{icon}</Text>
+                    <Ico name={icon} size={22} color={selectedIcon === icon ? COLORS.watermelon : COLORS.mutedText} />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -286,7 +310,7 @@ export default function RemindersScreen({ navigation }) {
                     style={[styles.colorDot, { backgroundColor: c.value }, selectedColor === c.value && styles.colorDotSelected]}
                     onPress={() => setSelectedColor(c.value)}
                   >
-                    {selectedColor === c.value && <Text style={styles.colorCheck}>✓</Text>}
+                    {selectedColor === c.value && <Ico name="checkmark" size={14} color={COLORS.white ?? "#FFFFFF"} />}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -310,7 +334,7 @@ export default function RemindersScreen({ navigation }) {
               {/* Preview */}
               <Text style={styles.fieldLabel}>Preview</Text>
               <View style={[styles.previewCard, { backgroundColor: selectedColor }]}>
-                <Text style={styles.previewIcon}>{selectedIcon}</Text>
+                <Ico name={selectedIcon} size={36} color={COLORS.watermelon} />
                 <Text style={styles.previewTitle}>{title || 'Reminder Title'}</Text>
                 <Text style={styles.previewTime}>{time || 'Time'}</Text>
               </View>
@@ -326,18 +350,18 @@ export default function RemindersScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
-  blobTopRight: { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: COLORS.pinkChampagne, opacity: 0.4, top: -60, right: -60 },
+  safeArea: { flex: 1, backgroundColor: COLORS.bg || '#FDF0F3' },
+  blobTopRight: { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: '#FAD4DC', opacity: 0.4, top: -60, right: -60 },
   blobBottomLeft: { position: 'absolute', width: 160, height: 160, borderRadius: 80, backgroundColor: COLORS.pastelPink, opacity: 0.25, bottom: 60, left: -50 },
 
   // Header
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14 },
-  backBtn: { backgroundColor: COLORS.white, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1.5, borderColor: COLORS.pinkChampagne },
-  backArrow: { fontSize: 13, color: COLORS.watermelon, fontWeight: '700' },
+  backBtn: { backgroundColor: COLORS.white, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1.5, borderColor: '#FAD4DC' },
+  backArrow: { fontSize: 13, color: '#E8748A', fontWeight: '700' },
   headerCenter: { alignItems: 'center' },
   headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.darkText },
   headerSub: { fontSize: 11, color: COLORS.mutedText, fontWeight: '500' },
-  addBtn: { backgroundColor: COLORS.watermelon, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 9, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
+  addBtn: { backgroundColor: '#E8748A', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 9, shadowColor: '#D06070', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
   addBtnText: { color: COLORS.white, fontSize: 13, fontWeight: '800' },
 
   scrollContent: { paddingHorizontal: 20, paddingTop: 8 },
@@ -347,7 +371,7 @@ const styles = StyleSheet.create({
   emptyEmoji: { fontSize: 56, marginBottom: 16 },
   emptyTitle: { fontSize: 20, fontWeight: '800', color: COLORS.darkText, marginBottom: 8 },
   emptySub: { fontSize: 14, color: COLORS.mutedText, textAlign: 'center', lineHeight: 20, marginBottom: 24 },
-  emptyBtn: { backgroundColor: COLORS.watermelon, borderRadius: 24, paddingHorizontal: 28, paddingVertical: 14, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 8 },
+  emptyBtn: { backgroundColor: '#E8748A', borderRadius: 24, paddingHorizontal: 28, paddingVertical: 14, shadowColor: '#D06070', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 8 },
   emptyBtnText: { color: COLORS.white, fontSize: 15, fontWeight: '700' },
 
   // Reminder card
@@ -359,8 +383,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
     borderWidth: 1.5,
-    borderColor: COLORS.pinkChampagne,
-    shadowColor: COLORS.watermelon,
+    borderColor: '#FAD4DC',
+    shadowColor: '#D06070',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -374,8 +398,8 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 15, fontWeight: '700', color: COLORS.darkText, marginBottom: 4 },
   cardMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   cardTime: { fontSize: 12, color: COLORS.mutedText, fontWeight: '500' },
-  repeatBadge: { backgroundColor: COLORS.lavenderBlush, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
-  repeatBadgeText: { fontSize: 10, color: COLORS.watermelon, fontWeight: '700' },
+  repeatBadge: { backgroundColor: '#FDE8ED', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
+  repeatBadgeText: { fontSize: 10, color: '#E8748A', fontWeight: '700' },
   deleteBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#FFF0F3', alignItems: 'center', justifyContent: 'center' },
   deleteBtnText: { fontSize: 16 },
 
@@ -393,25 +417,25 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 20,
   },
-  sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: COLORS.pinkChampagne, alignSelf: 'center', marginTop: 12, marginBottom: 4 },
+  sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: '#FAD4DC', alignSelf: 'center', marginTop: 12, marginBottom: 4 },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: COLORS.lavenderBlush },
   modalCancelText: { fontSize: 15, color: COLORS.mutedText, fontWeight: '600' },
   modalTitle: { fontSize: 17, fontWeight: '800', color: COLORS.darkText },
-  modalSaveBtn: { backgroundColor: COLORS.watermelon, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 8 },
+  modalSaveBtn: { backgroundColor: '#E8748A', borderRadius: 20, paddingHorizontal: 20, paddingVertical: 8 },
   modalSaveBtnText: { color: COLORS.white, fontWeight: '800', fontSize: 14 },
 
   modalScrollContent: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: Platform.OS === 'ios' ? 36 : 24 },
 
   fieldLabel: { fontSize: 13, fontWeight: '700', color: COLORS.darkText, marginBottom: 8, marginTop: 14, letterSpacing: 0.3 },
-  inputWrapper: { backgroundColor: COLORS.lavenderBlush, borderRadius: 14, borderWidth: 1.5, borderColor: COLORS.pastelPink, paddingHorizontal: 14 },
+  inputWrapper: { backgroundColor: '#FDE8ED', borderRadius: 14, borderWidth: 1.5, borderColor: '#F5A8B8', paddingHorizontal: 14 },
   inputWrapperError: { borderColor: COLORS.error },
   input: { fontSize: 15, color: COLORS.darkText, paddingVertical: 12 },
   errorText: { fontSize: 12, color: COLORS.error, marginTop: 4, marginLeft: 4, fontWeight: '500' },
 
   // Icon grid
   iconGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  iconOption: { width: 48, height: 48, borderRadius: 24, backgroundColor: COLORS.lavenderBlush, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'transparent' },
-  iconOptionSelected: { borderColor: COLORS.watermelon, backgroundColor: COLORS.pinkChampagne, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 3 },
+  iconOption: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#FDE8ED', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'transparent' },
+  iconOptionSelected: { borderColor: '#E8748A', backgroundColor: '#FAD4DC', shadowColor: '#D06070', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 3 },
   iconOptionEmoji: { fontSize: 22 },
 
   // Color dots
@@ -422,13 +446,13 @@ const styles = StyleSheet.create({
 
   // Repeat chips
   repeatRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  repeatChip: { paddingHorizontal: 18, paddingVertical: 9, borderRadius: 20, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.pastelPink },
-  repeatChipActive: { backgroundColor: COLORS.watermelon, borderColor: COLORS.watermelon },
+  repeatChip: { paddingHorizontal: 18, paddingVertical: 9, borderRadius: 20, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: '#F5A8B8' },
+  repeatChipActive: { backgroundColor: COLORS.rose || '#E8748A', borderColor: COLORS.rose || '#E8748A' },
   repeatChipText: { fontSize: 13, fontWeight: '600', color: COLORS.darkText },
   repeatChipTextActive: { color: COLORS.white, fontWeight: '700' },
 
   // Preview
-  previewCard: { borderRadius: 18, padding: 16, alignItems: 'flex-start', shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 8, elevation: 3 },
+  previewCard: { borderRadius: 18, padding: 16, alignItems: 'flex-start', shadowColor: '#D8808E', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 8, elevation: 3 },
   previewIcon: { fontSize: 26, marginBottom: 6 },
   previewTitle: { fontSize: 14, fontWeight: '700', color: COLORS.darkText, marginBottom: 3 },
   previewTime: { fontSize: 12, color: COLORS.mutedText, fontWeight: '500' },

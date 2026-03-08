@@ -13,14 +13,33 @@ const { width, height } = Dimensions.get('window');
 
 // 🎨 Pink Color Palette
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink: '#FFB3C6',
-  lightPink: '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon: '#FB6F92',
-  white: '#FFFFFF',
-  darkText: '#2D1B1E',
-  mutedText: '#9B6B78',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 const QUESTIONS = [
@@ -101,8 +120,7 @@ export default function OnboardingScreen({ navigation }) {
         setScrollValue(next.defaultValue || null);
       });
     } else {
-      // navigation.replace('Home');
-      navigation.replace('Register');
+      navigation.replace('Home');
     }
   };
 
@@ -241,10 +259,7 @@ export default function OnboardingScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.lavenderBlush,
-  },
+  safeArea: { flex: 1, backgroundColor: '#FDF0F3' },
   container: {
     flex: 1,
     paddingHorizontal: 24,
@@ -256,7 +271,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: COLORS.pinkChampagne,
+    backgroundColor: '#FAD4DC',
     opacity: 0.5,
     top: -60,
     right: -60,
@@ -266,7 +281,7 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     borderRadius: 80,
-    backgroundColor: COLORS.pastelPink,
+    backgroundColor: '#F5A8B8',
     opacity: 0.35,
     bottom: 80,
     left: -50,
@@ -278,7 +293,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   stepBadge: {
-    backgroundColor: COLORS.pinkChampagne,
+    backgroundColor: '#FAD4DC',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
@@ -286,7 +301,7 @@ const styles = StyleSheet.create({
   stepText: {
     fontSize: 13,
     fontWeight: '700',
-    color: COLORS.watermelon,
+    color: '#E8748A',
     letterSpacing: 0.5,
   },
   skipBtn: {
@@ -295,19 +310,19 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: 14,
-    color: COLORS.mutedText,
+    color: '#8F6470',
     fontWeight: '500',
   },
   progressTrack: {
     height: 5,
-    backgroundColor: COLORS.pinkChampagne,
+    backgroundColor: '#FAD4DC',
     borderRadius: 10,
     marginBottom: 32,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
     borderRadius: 10,
   },
   content: {
@@ -319,13 +334,13 @@ const styles = StyleSheet.create({
   questionTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: COLORS.darkText,
+    color: '#2C1A20',
     lineHeight: 36,
     marginBottom: 8,
   },
   questionSubtitle: {
     fontSize: 14,
-    color: COLORS.mutedText,
+    color: '#8F6470',
     fontWeight: '400',
     lineHeight: 20,
   },
@@ -347,20 +362,20 @@ const styles = StyleSheet.create({
     borderColor: COLORS.pastelPink,
     minWidth: '44%',
     alignItems: 'center',
-    shadowColor: COLORS.lightPink,
+    shadowColor: '#D8808E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 2,
   },
   optionChipActive: {
-    backgroundColor: COLORS.watermelon,
-    borderColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
+    borderColor: '#E8748A',
     elevation: 4,
   },
   optionText: {
     fontSize: 14,
-    color: COLORS.darkText,
+    color: '#2C1A20',
     fontWeight: '500',
   },
   optionTextActive: {
@@ -375,7 +390,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: COLORS.pastelPink,
-    shadowColor: COLORS.lightPink,
+    shadowColor: '#D8808E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
@@ -406,7 +421,7 @@ const styles = StyleSheet.create({
   selectedNumWrapper: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    backgroundColor: COLORS.lavenderBlush,
+    backgroundColor: '#FDE8ED',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 16,
@@ -417,7 +432,7 @@ const styles = StyleSheet.create({
   selectedNum: {
     fontSize: 38,
     fontWeight: '800',
-    color: COLORS.watermelon,
+    color: '#E8748A',
     lineHeight: 44,
   },
   daysTag: {
@@ -435,7 +450,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   continueBtn: {
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
     borderRadius: 50,
     paddingVertical: 18,
     flexDirection: 'row',
@@ -443,7 +458,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     marginTop: 16,
-    shadowColor: COLORS.watermelon,
+    shadowColor: '#D06070',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.35,
     shadowRadius: 16,
@@ -472,14 +487,14 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     width: 22,
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
   },
   dotInactive: {
     width: 6,
-    backgroundColor: COLORS.pastelPink,
+    backgroundColor: '#F5A8B8',
   },
   dotDone: {
     width: 6,
-    backgroundColor: COLORS.lightPink,
+    backgroundColor: '#F5A8B8',
   },
 });

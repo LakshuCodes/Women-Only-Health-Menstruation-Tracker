@@ -5,19 +5,43 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// ── Vector Icon helper ──
+const Ico = ({ name, size = 20, color = '#E8748A' }) => (
+  <Ionicons name={name} size={size} color={color} />
+);
+
 
 const { width } = Dimensions.get('window');
 
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink: '#FFB3C6',
-  lightPink: '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon: '#FB6F92',
-  white: '#FFFFFF',
-  darkText: '#2D1B1E',
-  mutedText: '#9B6B78',
-  black: '#000000',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -164,16 +188,16 @@ export default function ExerciseDetailScreen({ navigation, route }) {
           <Text style={styles.backArrow}>‹</Text>
         </TouchableOpacity>
 
-        <Text style={styles.heroEmoji}>{module.emoji}</Text>
+        <Ico name={module.icon || "body"} size={48} color={"rgba(255,255,255,0.9)"} />
         <Text style={styles.heroTitle}>{module.title}</Text>
         <Text style={styles.heroSubtitle}>{module.subtitle}</Text>
 
         <View style={styles.heroMeta}>
           <View style={styles.heroMetaChip}>
-            <Text style={styles.heroMetaText}>▶ {videos.length} videos</Text>
+            <View style={{flexDirection:"row",alignItems:"center",gap:4}}><Ico name="play" size={12} color="rgba(255,255,255,0.8)"/><Text style={styles.heroMetaText}>{videos.length} videos</Text></View>
           </View>
           <View style={styles.heroMetaChip}>
-            <Text style={styles.heroMetaText}>📱 YouTube</Text>
+            <View style={{flexDirection:'row',alignItems:'center',gap:4}}><Ico name='logo-youtube' size={14} color='rgba(255,255,255,0.8)'/><Text style={styles.heroMetaText}>YouTube</Text></View>
           </View>
         </View>
       </View>
@@ -186,7 +210,7 @@ export default function ExerciseDetailScreen({ navigation, route }) {
       {/* API key notice */}
       {usingFallback && YOUTUBE_API_KEY === 'YOUR_YOUTUBE_API_KEY' && (
         <View style={styles.apiNotice}>
-          <Text style={styles.apiNoticeIcon}>ℹ️</Text>
+          <Ico name="information-circle-outline" size={16} color={COLORS.mutedText ?? "#8F6470"} />
           <Text style={styles.apiNoticeText}>
             Add your YouTube API key in ExerciseDetailScreen.js to load live videos.
             Showing curated content for now.
@@ -229,7 +253,7 @@ export default function ExerciseDetailScreen({ navigation, route }) {
                   {/* Play button overlay */}
                   <View style={styles.playOverlay}>
                     <View style={[styles.playBtn, { backgroundColor: module.accent }]}>
-                      <Text style={styles.playBtnText}>▶</Text>
+                      <Ico name="play" size={20} color="#FFFFFF" />
                     </View>
                   </View>
                   {/* Duration badge */}
@@ -241,11 +265,11 @@ export default function ExerciseDetailScreen({ navigation, route }) {
                 {/* Video info */}
                 <View style={styles.videoInfo}>
                   <Text style={styles.videoTitle} numberOfLines={2}>{title}</Text>
-                  <Text style={styles.videoChannel}>📺 {channel}</Text>
+                  <View style={{flexDirection:"row",alignItems:"center",gap:4}}><Ico name="tv-outline" size={12} color={COLORS.mutedText ?? "#8F6470"}/><Text style={styles.videoChannel}>{channel}</Text></View>
                   {description.length > 0 && (
                     <Text style={styles.videoDesc} numberOfLines={2}>{description}</Text>
                   )}
-                  <View style={[styles.watchBtn, { backgroundColor: module.bg || '#FFE5EC', borderColor: module.accent + '60' }]}>
+                  <View style={[styles.watchBtn, { backgroundColor: module.bg || '#FDE8ED', borderColor: module.accent + '60' }]}>
                     <Text style={[styles.watchBtnText, { color: module.accent }]}>Watch on YouTube ↗</Text>
                   </View>
                 </View>
@@ -255,7 +279,7 @@ export default function ExerciseDetailScreen({ navigation, route }) {
 
           {/* Refresh button */}
           <TouchableOpacity style={[styles.refreshBtn, { borderColor: module.accent }]} onPress={fetchVideos}>
-            <Text style={[styles.refreshBtnText, { color: module.accent }]}>🔄 Load More Videos</Text>
+            <View style={{flexDirection:"row",alignItems:"center",gap:6}}><Ico name="refresh" size={16} color={module.accent}/><Text style={[styles.refreshBtnText, { color: module.accent }]}>Load More Videos</Text></View>
           </TouchableOpacity>
 
           <View style={{ height: 40 }} />
@@ -266,7 +290,7 @@ export default function ExerciseDetailScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
+  safeArea: { flex: 1, backgroundColor: COLORS.bg || '#FDF0F3' },
 
   hero: {
     paddingTop: 10,
@@ -318,7 +342,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 16,
     borderWidth: 1.5,
-    borderColor: COLORS.pinkChampagne,
+    borderColor: '#FAD4DC',
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },

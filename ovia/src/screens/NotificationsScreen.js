@@ -11,32 +11,63 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// ── Vector Icon helper ──
+const Ico = ({ name, size = 20, color = '#E8748A' }) => (
+  <Ionicons name={name} size={size} color={color} />
+);
+
+// ── Bell SVG Icon ──
+const BellIcon = ({ color = '#E8748A', size = 22 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <Path d="M13.73 21a2 2 0 0 1-3.46 0" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
+
+import Svg, { Path } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink: '#FFB3C6',
-  lightPink: '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon: '#FB6F92',
-  deepPink: '#E8487A',
-  white: '#FFFFFF',
-  darkText: '#2D1B1E',
-  mutedText: '#9B6B78',
-  unreadBg: '#FFF5F8',
-  readBg: '#FFFFFF',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 // ── Notification type config ──
 const TYPE_CONFIG = {
-  reminder:   { icon: '⏰', color: '#FB6F92', bg: '#FFE5EC', label: 'Reminder' },
-  cycle:      { icon: '🌸', color: '#E91E63', bg: '#FCE4EC', label: 'Cycle' },
-  exercise:   { icon: '🧘', color: '#AB47BC', bg: '#F3E5F5', label: 'Exercise' },
-  health:     { icon: '💊', color: '#4CAF50', bg: '#E8F5E9', label: 'Health' },
-  community:  { icon: '💬', color: '#1E88E5', bg: '#E3F2FD', label: 'Community' },
-  tip:        { icon: '💡', color: '#FF9800', bg: '#FFF3E0', label: 'Tip' },
-  doctor:     { icon: '🩺', color: '#00ACC1', bg: '#E0F7FA', label: 'Doctor' },
+  reminder:   { icon: 'alarm', color: '#E8748A', bg: '#FDE8ED', label: 'Reminder' },
+  cycle:      { icon: 'flower', color: '#E91E63', bg: '#FCE4EC', label: 'Cycle' },
+  exercise:   { icon: 'body', color: '#AB47BC', bg: '#F3E5F5', label: 'Exercise' },
+  health:     { icon: 'medical', color: '#4CAF50', bg: '#E8F5E9', label: 'Health' },
+  community:  { icon: 'chatbubbles', color: '#1E88E5', bg: '#E3F2FD', label: 'Community' },
+  tip:        { icon: 'bulb', color: '#FF9800', bg: '#FFF3E0', label: 'Tip' },
+  doctor:     { icon: 'pulse', color: '#00ACC1', bg: '#E0F7FA', label: 'Doctor' },
 };
 
 const INITIAL_NOTIFICATIONS = [
@@ -53,7 +84,7 @@ const INITIAL_NOTIFICATIONS = [
     id: '2',
     type: 'reminder',
     title: 'Iron Supplement',
-    body: "Don't forget your 8:00 AM iron supplement. Consistency is key for your health 💊",
+    body: "Don't forget your 8:00 AM iron supplement. Consistency is key for your health.",
     time: '30 mins ago',
     timeMs: Date.now() - 30 * 60 * 1000,
     read: false,
@@ -79,7 +110,7 @@ const INITIAL_NOTIFICATIONS = [
   {
     id: '5',
     type: 'tip',
-    title: 'Hydration Reminder 💧',
+    title: 'Hydration Reminder',
     body: "You've logged 1.2L of water today. Try to reach your 2L goal before bedtime.",
     time: '3 hours ago',
     timeMs: Date.now() - 3 * 60 * 60 * 1000,
@@ -107,7 +138,7 @@ const INITIAL_NOTIFICATIONS = [
     id: '8',
     type: 'health',
     title: 'Weekly Health Summary',
-    body: 'You logged 5 of 7 days this week. Sleep average: 7h 20m. Mood trend: Positive 😊',
+    body: 'You logged 5 of 7 days this week. Sleep average: 7h 20m. Mood trend: Positive',
     time: '2 days ago',
     timeMs: Date.now() - 2 * 24 * 60 * 60 * 1000,
     read: true,
@@ -115,7 +146,7 @@ const INITIAL_NOTIFICATIONS = [
   {
     id: '9',
     type: 'exercise',
-    title: 'Morning Yoga Streak 🔥',
+    title: 'Morning Yoga Streak',
     body: "You've completed yoga 3 days in a row! Keep it up to maintain your streak.",
     time: '2 days ago',
     timeMs: Date.now() - 2 * 24 * 60 * 60 * 1000,
@@ -208,7 +239,7 @@ export default function NotificationsScreen({ navigation }) {
 
         {/* Icon */}
         <View style={[styles.notifIconBadge, { backgroundColor: cfg.bg }]}>
-          <Text style={styles.notifIconEmoji}>{cfg.icon}</Text>
+          <Ico name={cfg.icon} size={22} color={cfg.color} />
         </View>
 
         {/* Content */}
@@ -229,7 +260,7 @@ export default function NotificationsScreen({ navigation }) {
               onPress={() => handleDelete(notif.id)}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Text style={styles.deleteBtnText}>✕</Text>
+  <Ico name="close" size={16} color={COLORS.mutedText} />
             </TouchableOpacity>
           </View>
         </View>
@@ -239,7 +270,7 @@ export default function NotificationsScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg || '#FDF0F3'} />
 
       {/* Decorative blobs */}
       <View style={styles.blob1} />
@@ -261,7 +292,7 @@ export default function NotificationsScreen({ navigation }) {
             )}
           </View>
           <Text style={styles.headerSub}>
-            {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up 🎉'}
+            {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
           </Text>
         </View>
 
@@ -277,7 +308,7 @@ export default function NotificationsScreen({ navigation }) {
             ]
           )}
         >
-          <Text style={styles.moreBtnText}>⋯</Text>
+          <Ico name="ellipsis-horizontal" size={18} color={COLORS.mutedText} />
         </TouchableOpacity>
       </View>
 
@@ -302,8 +333,8 @@ export default function NotificationsScreen({ navigation }) {
               </Text>
               {/* Unread count badge on the 'unread' tab */}
               {tab.key === 'unread' && unreadCount > 0 && (
-                <View style={styles.filterCountBadge}>
-                  <Text style={styles.filterCountText}>{unreadCount}</Text>
+                <View style={[styles.filterCountBadge, isActive && styles.filterCountBadgeActive]}>
+                  <Text style={[styles.filterCountText, isActive && styles.filterCountTextActive]}>{unreadCount}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -319,7 +350,7 @@ export default function NotificationsScreen({ navigation }) {
       >
         {filtered.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>🔔</Text>
+            <BellIcon color='#F5A8B8' size={52} />
             <Text style={styles.emptyTitle}>
               {activeFilter === 'unread' ? 'All caught up!' : 'No notifications'}
             </Text>
@@ -352,7 +383,7 @@ export default function NotificationsScreen({ navigation }) {
         {/* Mark all read CTA */}
         {unreadCount > 0 && (
           <TouchableOpacity style={styles.markAllBtn} onPress={handleMarkAllRead}>
-            <Text style={styles.markAllBtnText}>✓ Mark all as read</Text>
+            <View style={{flexDirection:"row",alignItems:"center",gap:4}}><Ico name="checkmark-done" size={14} color={COLORS.watermelon}/><Text style={styles.markAllBtnText}>Mark all as read</Text></View>
           </TouchableOpacity>
         )}
 
@@ -363,8 +394,8 @@ export default function NotificationsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
-  blob1: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: COLORS.pinkChampagne, opacity: 0.35, top: -70, right: -70 },
+  safeArea: { flex: 1, backgroundColor: COLORS.bg || '#FDF0F3' },
+  blob1: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: '#FAD4DC', opacity: 0.35, top: -70, right: -70 },
   blob2: { position: 'absolute', width: 150, height: 150, borderRadius: 75, backgroundColor: COLORS.pastelPink, opacity: 0.2, bottom: 80, left: -50 },
 
   // ── Header ──
@@ -376,14 +407,14 @@ const styles = StyleSheet.create({
   backBtn: {
     backgroundColor: COLORS.white, borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 8,
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
+    borderWidth: 1.5, borderColor: '#FAD4DC',
   },
-  backArrow: { fontSize: 13, color: COLORS.watermelon, fontWeight: '700' },
+  backArrow: { fontSize: 13, color: '#E8748A', fontWeight: '700' },
   headerCenter: { alignItems: 'center' },
   headerTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   headerTitle: { fontSize: 19, fontWeight: '800', color: COLORS.darkText },
   unreadBadge: {
-    backgroundColor: COLORS.watermelon, borderRadius: 12,
+    backgroundColor: '#E8748A', borderRadius: 12,
     paddingHorizontal: 8, paddingVertical: 2, minWidth: 22, alignItems: 'center',
   },
   unreadBadgeText: { color: COLORS.white, fontSize: 11, fontWeight: '800' },
@@ -391,7 +422,7 @@ const styles = StyleSheet.create({
   moreBtn: {
     width: 38, height: 38, borderRadius: 19,
     backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5, borderColor: COLORS.pinkChampagne,
+    borderWidth: 1.5, borderColor: '#FAD4DC',
   },
   moreBtnText: { fontSize: 18, color: COLORS.darkText, fontWeight: '800', lineHeight: 22 },
 
@@ -399,35 +430,51 @@ const styles = StyleSheet.create({
   filterScroll: { flexGrow: 0, marginBottom: 14 },
   filterScrollContent: {
     paddingHorizontal: 20,
-    paddingVertical: 4,
+    paddingVertical: 6,
     paddingRight: 30,
+    alignItems: 'center',
   },
   filterChip: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: 16, paddingVertical: 9,
-    borderRadius: 50, backgroundColor: COLORS.white,
-    borderWidth: 1.5, borderColor: COLORS.pastelPink,
-    marginRight: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 34,
+    paddingHorizontal: 16,
+    borderRadius: 17,
+    backgroundColor: COLORS.white,
+    borderWidth: 1.5,
+    borderColor: '#F5A8B8',
+    marginRight: 8,
   },
   filterChipActive: {
-    backgroundColor: COLORS.watermelon, borderColor: COLORS.watermelon,
-    shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 3 },
+    backgroundColor: COLORS.rose || '#E8748A', borderColor: COLORS.rose || '#E8748A',
+    shadowColor: '#D06070', shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3, shadowRadius: 6, elevation: 4,
   },
-  filterChipText: { fontSize: 13, fontWeight: '600', color: COLORS.mutedText },
+  filterChipText: { fontSize: 13, fontWeight: '600', color: COLORS.mutedText, lineHeight: 18 },
   filterChipTextActive: { color: COLORS.white, fontWeight: '700' },
   filterCountBadge: {
-    backgroundColor: COLORS.white, borderRadius: 10,
-    paddingHorizontal: 6, paddingVertical: 1, marginLeft: 6,
+    backgroundColor: '#FDE8ED',
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    marginLeft: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  filterCountText: { fontSize: 10, color: COLORS.watermelon, fontWeight: '800' },
+  filterCountBadgeActive: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  filterCountText: { fontSize: 11, color: '#E8748A', fontWeight: '800', lineHeight: 14 },
+  filterCountTextActive: { color: COLORS.white },
 
   // ── List ──
   listContent: { paddingHorizontal: 20, paddingTop: 4 },
 
   // ── Group header ──
   groupHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12, marginTop: 6 },
-  groupLine: { flex: 1, height: 1, backgroundColor: COLORS.pinkChampagne },
+  groupLine: { flex: 1, height: 1, backgroundColor: '#FAD4DC' },
   groupLabel: { fontSize: 11, fontWeight: '700', color: COLORS.mutedText, letterSpacing: 0.8, textTransform: 'uppercase' },
 
   // ── Notification card ──
@@ -439,7 +486,7 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
     borderWidth: 1.5,
-    borderColor: COLORS.pinkChampagne,
+    borderColor: '#FAD4DC',
     borderLeftWidth: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -451,7 +498,7 @@ const styles = StyleSheet.create({
   },
   notifCardUnread: {
     backgroundColor: COLORS.unreadBg,
-    borderColor: COLORS.pastelPink,
+    borderColor: '#F5A8B8',
     shadowOpacity: 0.1,
     elevation: 3,
   },
@@ -492,7 +539,7 @@ const styles = StyleSheet.create({
   notifTime: { fontSize: 11, color: COLORS.pastelPink, fontWeight: '600' },
   deleteBtn: {
     width: 22, height: 22, borderRadius: 11,
-    backgroundColor: COLORS.lavenderBlush,
+    backgroundColor: '#FDE8ED',
     alignItems: 'center', justifyContent: 'center',
   },
   deleteBtnText: { fontSize: 10, color: COLORS.mutedText, fontWeight: '700' },
@@ -501,10 +548,10 @@ const styles = StyleSheet.create({
   markAllBtn: {
     backgroundColor: COLORS.white, borderRadius: 16,
     paddingVertical: 13, alignItems: 'center',
-    borderWidth: 2, borderColor: COLORS.pastelPink,
+    borderWidth: 2, borderColor: '#F5A8B8',
     marginTop: 4,
   },
-  markAllBtnText: { fontSize: 14, color: COLORS.watermelon, fontWeight: '700' },
+  markAllBtnText: { fontSize: 14, color: '#E8748A', fontWeight: '700' },
 
   // Empty state
   emptyState: { alignItems: 'center', paddingVertical: 60 },

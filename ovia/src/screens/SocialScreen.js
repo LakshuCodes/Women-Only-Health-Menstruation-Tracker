@@ -14,20 +14,52 @@ import {
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// ── Vector Icon helper ──
+const Ico = ({ name, size = 20, color = '#E8748A' }) => (
+  <Ionicons name={name} size={size} color={color} />
+);
+
 import Svg, { Rect, Path, Line, Polygon } from 'react-native-svg';
+// ── Bell SVG Icon ──
+const BellIcon = ({ color = '#E8748A', size = 22 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <Path d="M13.73 21a2 2 0 0 1-3.46 0" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </Svg>
+);
+
 
 const { width } = Dimensions.get('window');
 
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink: '#FFB3C6',
-  lightPink: '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon: '#FB6F92',
-  white: '#FFFFFF',
-  darkText: '#2D1B1E',
-  mutedText: '#9B6B78',
-  navInactive: '#A0A0B0',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 // ── Nav Icons ──
@@ -107,7 +139,7 @@ const FEED_TABS = [
 const POST_TAGS = ['General', 'PCOS', 'Pregnancy', 'Mental Health', 'Nutrition', 'Exercise', 'Period Tips', 'Story'];
 
 const TAG_COLORS = {
-  'General':      { bg: '#FFE5EC', text: COLORS.watermelon },
+  'General':      { bg: '#FDE8ED', text: COLORS.watermelon },
   'PCOS':         { bg: '#F3E5F5', text: '#8E24AA' },
   'Pregnancy':    { bg: '#E8F5E9', text: '#2E7D32' },
   'Mental Health':{ bg: '#E3F2FD', text: '#1565C0' },
@@ -127,17 +159,17 @@ const SEED_POSTS = [
     user: 'Raea M.',
     handle: '@raea_m',
     avatarLetter: 'R',
-    avatarColor: '#FB6F92',
+    avatarColor: '#E8748A',
     time: '36 mins ago',
     tag: 'General',
-    content: "Feeling so grateful for this community's support during my recovery journey. You all make such a 🌸 difference.",
+    content: "Feeling so grateful for this community's support during my recovery journey. You all make such a difference.",
     likes: 34,
     comments: 12,
     liked: false,
     saved: false,
     commentList: [
-      { id: 'c1', user: 'Maya J.', text: 'So happy to hear this 💕', time: '10m ago', avatarColor: '#FF8FAB' },
-      { id: 'c2', user: 'Priya S.', text: 'We are always here for you!', time: '5m ago', avatarColor: '#9B6B78' },
+      { id: 'c1', user: 'Maya J.', text: 'So happy to hear this!', time: '10m ago', avatarColor: '#F5A8B8' },
+      { id: 'c2', user: 'Priya S.', text: 'We are always here for you!', time: '5m ago', avatarColor: '#8F6470' },
     ],
   },
   {
@@ -146,16 +178,16 @@ const SEED_POSTS = [
     user: 'Elena Rodriguez',
     handle: '@elena_r',
     avatarLetter: 'E',
-    avatarColor: '#9B6B78',
+    avatarColor: '#8F6470',
     time: '2 hours ago',
     tag: 'PCOS',
-    content: 'Just completed my first week of daily medication. Small steps lead to big changes. Sending love to everyone starting their week today 💊',
+    content: 'Just completed my first week of daily medication. Small steps lead to big changes. Sending love to everyone starting their week today',
     likes: 42,
     comments: 8,
     liked: false,
     saved: false,
     commentList: [
-      { id: 'c3', user: 'Lisa C.', text: 'Keep going! You got this 🌸', time: '1h ago', avatarColor: '#FFC2D1' },
+      { id: 'c3', user: 'Lisa C.', text: 'Keep going! You got this!', time: '1h ago', avatarColor: '#FAD4DC' },
     ],
   },
   {
@@ -164,10 +196,10 @@ const SEED_POSTS = [
     user: 'Maya Lemon',
     handle: '@maya_lemon',
     avatarLetter: 'M',
-    avatarColor: '#FF8FAB',
+    avatarColor: '#F5A8B8',
     time: '5 hours ago',
     tag: 'Story',
-    content: "Morning yoga sessions. It's not about being perfect, it's about showing up for yourself 🧘‍♀️ Consistency is everything.",
+    content: "Morning yoga sessions. It's not about being perfect, it's about showing up for yourself. Consistency is everything.",
     likes: 56,
     comments: 24,
     liked: false,
@@ -180,10 +212,10 @@ const SEED_POSTS = [
     user: 'Priya Sharma',
     handle: '@priya_s',
     avatarLetter: 'P',
-    avatarColor: '#FFC2D1',
+    avatarColor: '#FAD4DC',
     time: '1 day ago',
     tag: 'Period Tips',
-    content: 'Hot water bottle + chamomile tea + this playlist = surviving day 2. Sharing my period survival kit with you all 💊❤️ Drop yours in comments!',
+    content: 'Hot water bottle + chamomile tea + this playlist = surviving day 2. Sharing my period survival kit with you all. Drop yours in comments!',
     likes: 89,
     comments: 31,
     liked: false,
@@ -310,7 +342,7 @@ export default function SocialScreen({ navigation }) {
       {/* Own post badge */}
       {post.isOwn && (
         <View style={styles.ownBadge}>
-          <Text style={styles.ownBadgeText}>✏️ Your Post</Text>
+          <View style={{flexDirection:'row',alignItems:'center',gap:4}}><Ico name='create-outline' size={12} color={COLORS.watermelon}/><Text style={styles.ownBadgeText}>Your Post</Text></View>
         </View>
       )}
 
@@ -347,7 +379,7 @@ export default function SocialScreen({ navigation }) {
           onPress={() => setOpenComments(openComments === post.id ? null : post.id)}
           activeOpacity={0.7}
         >
-          <Text style={styles.actionEmoji}>💬</Text>
+          <Ico name="chatbubble-outline" size={16} color={COLORS.mutedText??'#8F6470'} />
           <Text style={styles.actionCount}>{post.comments}</Text>
         </TouchableOpacity>
 
@@ -367,7 +399,7 @@ export default function SocialScreen({ navigation }) {
       {/* Saved indicator */}
       {post.saved && (
         <View style={styles.savedIndicator}>
-          <Text style={styles.savedIndicatorText}>🔖 Saved to your collection</Text>
+          <View style={{flexDirection:"row",alignItems:"center",gap:4}}><Ico name="bookmark" size={12} color={COLORS.watermelon}/><Text style={styles.savedIndicatorText}>Saved to your collection</Text></View>
         </View>
       )}
 
@@ -377,7 +409,7 @@ export default function SocialScreen({ navigation }) {
           <View style={styles.commentsDivider} />
 
           {post.commentList.length === 0 && (
-            <Text style={styles.noComments}>Be the first to comment 💬</Text>
+            <Text style={styles.noComments}>Be the first to comment</Text>
           )}
 
           {post.commentList.map(c => (
@@ -396,7 +428,7 @@ export default function SocialScreen({ navigation }) {
 
           {/* Add comment */}
           <View style={styles.addCommentRow}>
-            <View style={[styles.commentAvatar, { backgroundColor: COLORS.watermelon }]}>
+            <View style={[styles.commentAvatar, { backgroundColor: '#E8748A' }]}>
               <Text style={styles.commentAvatarText}>Y</Text>
             </View>
             <View style={styles.commentInputWrapper}>
@@ -424,7 +456,7 @@ export default function SocialScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg || '#FDF0F3'} />
 
       {/* ── HEADER ── */}
       <View style={styles.header}>
@@ -433,7 +465,7 @@ export default function SocialScreen({ navigation }) {
           <Text style={styles.headerSub}>{posts.length} posts · {posts.filter(p => p.isOwn).length} by you</Text>
         </View>
         <TouchableOpacity style={styles.bellBtn} onPress={() => navigation.navigate('Notifications')}>
-          <Text style={{ fontSize: 20 }}>🔔</Text>
+          <BellIcon color='#E8748A' size={22} />
           <View style={styles.bellDot} />
         </TouchableOpacity>
       </View>
@@ -475,7 +507,7 @@ export default function SocialScreen({ navigation }) {
           {/* Tab-specific headers */}
           {feedTab === 'saved' && (
             <View style={styles.tabHeaderBanner}>
-              <Text style={styles.tabHeaderEmoji}>🔖</Text>
+              <Ico name="bookmark" size={18} color={COLORS.watermelon} />
               <View>
                 <Text style={styles.tabHeaderTitle}>Saved Posts</Text>
                 <Text style={styles.tabHeaderSub}>
@@ -489,7 +521,7 @@ export default function SocialScreen({ navigation }) {
 
           {feedTab === 'mine' && (
             <View style={styles.tabHeaderBanner}>
-              <Text style={styles.tabHeaderEmoji}>✏️</Text>
+              <Ico name="create" size={18} color={COLORS.watermelon} />
               <View>
                 <Text style={styles.tabHeaderTitle}>My Stories</Text>
                 <Text style={styles.tabHeaderSub}>
@@ -504,14 +536,14 @@ export default function SocialScreen({ navigation }) {
           {/* Empty states */}
           {filteredPosts.length === 0 && feedTab === 'saved' && (
             <EmptyState
-              emoji="🔖"
+              emoji="bookmark"
               title="No saved posts yet"
               subtitle="Tap the bookmark icon on any post to save it for later"
             />
           )}
           {filteredPosts.length === 0 && feedTab === 'mine' && (
             <EmptyState
-              emoji="✏️"
+              emoji="create"
               title="You haven't posted yet"
               subtitle={'Tap "Share Your Story" below to create your first post'}
             />
@@ -530,7 +562,7 @@ export default function SocialScreen({ navigation }) {
         onPress={() => setShowCompose(true)}
         activeOpacity={0.85}
       >
-        <Text style={styles.fabIcon}>✏️</Text>
+        <Ico name="create" size={24} color="#FFFFFF" />
         <Text style={styles.fabText}>Share Your Story</Text>
       </TouchableOpacity>
 
@@ -591,7 +623,7 @@ export default function SocialScreen({ navigation }) {
 
             {/* Input area */}
             <View style={styles.composeBody}>
-              <View style={[styles.avatar, { backgroundColor: COLORS.watermelon, marginRight: 12, flexShrink: 0 }]}>
+              <View style={[styles.avatar, { backgroundColor: '#E8748A', marginRight: 12, flexShrink: 0 }]}>
                 <Text style={styles.avatarText}>Y</Text>
               </View>
               <TextInput
@@ -632,7 +664,7 @@ export default function SocialScreen({ navigation }) {
                     ]}
                     onPress={() => setSelectedTag(tag)}
                   >
-                    {isSelected && <Text style={styles.tagOptionCheck}>✓ </Text>}
+                    {isSelected && <Ico name="checkmark" size={14} color={COLORS.watermelon} />}
                     <Text style={[styles.tagOptionText, { color: ts.text }]}>{tag}</Text>
                   </TouchableOpacity>
                 );
@@ -642,10 +674,10 @@ export default function SocialScreen({ navigation }) {
             {/* Bottom tools */}
             <View style={styles.composeBottomBar}>
               <TouchableOpacity style={styles.composeToolBtn}>
-                <Text style={{ fontSize: 22 }}>📷</Text>
+                <Ico name="camera" size={22} color={COLORS.mutedText} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.composeToolBtn}>
-                <Text style={{ fontSize: 22 }}>🎤</Text>
+                <Ico name="mic" size={22} color={COLORS.mutedText} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.composeToolBtn}>
                 <Text style={{ fontSize: 22 }}>😊</Text>
@@ -662,29 +694,29 @@ export default function SocialScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
+  safeArea: { flex: 1, backgroundColor: COLORS.bg || '#FDF0F3' },
 
   // ── Header ──
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14 },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.watermelon, letterSpacing: 0.2 },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: '#E8748A', letterSpacing: 0.2 },
   headerSub: { fontSize: 12, color: COLORS.mutedText, fontWeight: '500', marginTop: 2 },
-  bellBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: COLORS.pinkChampagne },
-  bellDot: { position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.watermelon, borderWidth: 1.5, borderColor: COLORS.white },
+  bellBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#FAD4DC' },
+  bellDot: { position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: 4, backgroundColor: '#E8748A', borderWidth: 1.5, borderColor: COLORS.white },
 
   // ── Feed Tabs ──
-  feedTabsRow: { flexDirection: 'row', paddingHorizontal: 20, borderBottomWidth: 1.5, borderBottomColor: COLORS.pinkChampagne, backgroundColor: COLORS.lavenderBlush },
+  feedTabsRow: { flexDirection: 'row', paddingHorizontal: 20, borderBottomWidth: 1.5, borderBottomColor: COLORS.pinkChampagne, backgroundColor: '#FDE8ED' },
   feedTab: { marginRight: 20, paddingVertical: 12, position: 'relative', flexDirection: 'row', alignItems: 'center', gap: 5 },
   feedTabText: { fontSize: 14, fontWeight: '600', color: COLORS.mutedText },
-  feedTabTextActive: { color: COLORS.watermelon, fontWeight: '800' },
-  feedTabUnderline: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 2.5, backgroundColor: COLORS.watermelon, borderRadius: 2 },
-  tabCountBadge: { backgroundColor: COLORS.watermelon, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2, minWidth: 18, alignItems: 'center' },
+  feedTabTextActive: { color: '#E8748A', fontWeight: '800' },
+  feedTabUnderline: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 2.5, backgroundColor: '#E8748A', borderRadius: 2 },
+  tabCountBadge: { backgroundColor: '#E8748A', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2, minWidth: 18, alignItems: 'center' },
   tabCountText: { color: COLORS.white, fontSize: 10, fontWeight: '800' },
 
   // ── Scroll ──
   scrollContent: { paddingHorizontal: 16, paddingTop: 14 },
 
   // ── Tab header banner ──
-  tabHeaderBanner: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: COLORS.white, borderRadius: 16, padding: 14, marginBottom: 16, borderWidth: 1.5, borderColor: COLORS.pinkChampagne },
+  tabHeaderBanner: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: COLORS.white, borderRadius: 16, padding: 14, marginBottom: 16, borderWidth: 1.5, borderColor: '#FAD4DC' },
   tabHeaderEmoji: { fontSize: 26 },
   tabHeaderTitle: { fontSize: 15, fontWeight: '800', color: COLORS.darkText },
   tabHeaderSub: { fontSize: 12, color: COLORS.mutedText, fontWeight: '400', marginTop: 2 },
@@ -702,29 +734,29 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 14,
     borderWidth: 1.5,
-    borderColor: COLORS.pinkChampagne,
-    shadowColor: COLORS.watermelon,
+    borderColor: '#FAD4DC',
+    shadowColor: '#D06070',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.07,
     shadowRadius: 10,
     elevation: 3,
   },
   postCardOwn: {
-    borderColor: COLORS.watermelon,
+    borderColor: '#E8748A',
     borderWidth: 2,
     shadowOpacity: 0.14,
   },
   ownBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: COLORS.lavenderBlush,
+    backgroundColor: '#FDE8ED',
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 4,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: COLORS.pastelPink,
+    borderColor: '#F5A8B8',
   },
-  ownBadgeText: { fontSize: 11, color: COLORS.watermelon, fontWeight: '700' },
+  ownBadgeText: { fontSize: 11, color: '#E8748A', fontWeight: '700' },
 
   postHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   avatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
@@ -741,31 +773,31 @@ const styles = StyleSheet.create({
   actionsRow: { flexDirection: 'row', alignItems: 'center', paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.lavenderBlush },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, marginRight: 16 },
   actionHeart: { fontSize: 18, color: COLORS.mutedText },
-  actionHeartLiked: { color: COLORS.watermelon },
+  actionHeartLiked: { color: '#E8748A' },
   actionEmoji: { fontSize: 17 },
   actionCount: { fontSize: 13, color: COLORS.mutedText, fontWeight: '600' },
-  actionCountLiked: { color: COLORS.watermelon },
+  actionCountLiked: { color: '#E8748A' },
   saveBtn: { padding: 4 },
 
   // ── Saved indicator ──
-  savedIndicator: { marginTop: 8, backgroundColor: COLORS.lavenderBlush, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5, alignSelf: 'flex-end' },
-  savedIndicatorText: { fontSize: 11, color: COLORS.watermelon, fontWeight: '600' },
+  savedIndicator: { marginTop: 8, backgroundColor: '#FDE8ED', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5, alignSelf: 'flex-end' },
+  savedIndicatorText: { fontSize: 11, color: '#E8748A', fontWeight: '600' },
 
   // ── Comments ──
   commentsSection: { marginTop: 10 },
-  commentsDivider: { height: 1, backgroundColor: COLORS.lavenderBlush, marginBottom: 12 },
+  commentsDivider: { height: 1, backgroundColor: '#FDE8ED', marginBottom: 12 },
   noComments: { fontSize: 12, color: COLORS.mutedText, textAlign: 'center', paddingVertical: 8 },
   commentRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
   commentAvatar: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginRight: 8, flexShrink: 0 },
   commentAvatarText: { color: COLORS.white, fontSize: 12, fontWeight: '800' },
-  commentBubble: { flex: 1, backgroundColor: COLORS.lavenderBlush, borderRadius: 14, padding: 10 },
+  commentBubble: { flex: 1, backgroundColor: '#FDE8ED', borderRadius: 14, padding: 10 },
   commentUser: { fontSize: 12, fontWeight: '700', color: COLORS.darkText, marginBottom: 2 },
   commentTime: { fontSize: 10, color: COLORS.mutedText, fontWeight: '400' },
   commentText: { fontSize: 13, color: COLORS.darkText, lineHeight: 18 },
   addCommentRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
-  commentInputWrapper: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.lavenderBlush, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1.5, borderColor: COLORS.pastelPink },
+  commentInputWrapper: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#FDE8ED', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1.5, borderColor: '#F5A8B8' },
   commentInput: { flex: 1, fontSize: 13, color: COLORS.darkText, paddingVertical: 2 },
-  commentSendBtn: { width: 28, height: 28, borderRadius: 14, backgroundColor: COLORS.watermelon, alignItems: 'center', justifyContent: 'center', marginLeft: 6 },
+  commentSendBtn: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#E8748A', alignItems: 'center', justifyContent: 'center', marginLeft: 6 },
   commentSendText: { color: COLORS.white, fontSize: 14, fontWeight: '800' },
 
   // ── FAB ──
@@ -774,14 +806,14 @@ const styles = StyleSheet.create({
     bottom: 105,
     left: width / 2 - 90,
     width: 180,
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
     borderRadius: 28,
     paddingVertical: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    shadowColor: COLORS.watermelon,
+    shadowColor: '#D06070',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 16,
@@ -822,7 +854,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 3,
     borderRadius: 2,
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
   },
   navActiveCircle: {
     position: 'absolute',
@@ -830,7 +862,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.lavenderBlush,
+    backgroundColor: COLORS.roseCircle || '#FADADF',
     zIndex: -1,
   },
   navLabel: {
@@ -840,7 +872,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
     letterSpacing: 0.2,
   },
-  navLabelActive: { color: COLORS.watermelon, fontWeight: '700' },
+  navLabelActive: { color: '#E8748A', fontWeight: '700' },
 
   // ── Compose Modal ──
   modalOverlay: { flex: 1, justifyContent: 'flex-end' },
@@ -856,17 +888,17 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 20,
   },
-  sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: COLORS.pinkChampagne, alignSelf: 'center', marginTop: 12, marginBottom: 4 },
+  sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: '#FAD4DC', alignSelf: 'center', marginTop: 12, marginBottom: 4 },
   composeHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: COLORS.lavenderBlush },
   composeCancelText: { fontSize: 15, color: COLORS.mutedText, fontWeight: '600' },
   composeTitle: { fontSize: 16, fontWeight: '800', color: COLORS.darkText },
-  composePostBtn: { backgroundColor: COLORS.watermelon, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 8 },
+  composePostBtn: { backgroundColor: '#E8748A', borderRadius: 20, paddingHorizontal: 20, paddingVertical: 8 },
   composePostBtnDisabled: { opacity: 0.4 },
   composePostBtnText: { color: COLORS.white, fontWeight: '800', fontSize: 14 },
   composeBody: { flexDirection: 'row', padding: 20, alignItems: 'flex-start' },
   composeInput: { flex: 1, fontSize: 15, color: COLORS.darkText, lineHeight: 24, minHeight: 90, textAlignVertical: 'top' },
   charCount: { textAlign: 'right', paddingHorizontal: 20, fontSize: 12, color: COLORS.mutedText, marginBottom: 8 },
-  charCountWarn: { color: COLORS.watermelon, fontWeight: '700' },
+  charCountWarn: { color: '#E8748A', fontWeight: '700' },
   tagSelectorLabel: { paddingHorizontal: 20, fontSize: 12, fontWeight: '700', color: COLORS.darkText, marginBottom: 8 },
   tagScroll: { marginBottom: 14 },
   tagScrollContent: { paddingHorizontal: 20, gap: 8 },

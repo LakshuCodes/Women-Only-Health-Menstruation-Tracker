@@ -11,22 +11,44 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+// ── Vector Icon helper ──
+const Ico = ({ name, size = 20, color = '#E8748A' }) => (
+  <Ionicons name={name} size={size} color={color} />
+);
+
 import Svg, { Rect, Path, Circle, Line, Polyline } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 
 const COLORS = {
-  lavenderBlush: '#FFE5EC',
-  pastelPink: '#FFB3C6',
-  lightPink: '#FF8FAB',
-  pinkChampagne: '#FFC2D1',
-  watermelon: '#FB6F92',
-  white: '#FFFFFF',
-  darkText: '#2D1B1E',
-  mutedText: '#9B6B78',
-  navInactive: '#A0A0B0',
-  online: '#4CAF50',
-  busy: '#FF9800',
+  bg:          '#FDF0F3',
+  card:        '#FFFFFF',
+  rose:        '#E8748A',
+  roseDark:    '#C95470',
+  roseLight:   '#F5A8B8',
+  roseFog:     '#FAD4DC',
+  roseMist:    '#FDE8ED',
+  roseCircle:  '#FDE8ED',
+  purple:      '#A78FD0',
+  green:       '#5BBF87',
+  text:        '#2C1A20',
+  sub:         '#8F6470',
+  faint:       '#BFA0AA',
+  white:       '#FFFFFF',
+  // legacy aliases (keep for backward compat)
+  lavenderBlush:  '#FDE8ED',
+  pastelPink:     '#F5A8B8',
+  lightPink:      '#F5A8B8',
+  pinkChampagne:  '#FAD4DC',
+  watermelon:     '#E8748A',
+  deepPink:       '#C95470',
+  darkText:       '#2C1A20',
+  mutedText:      '#8F6470',
+  navInactive:    '#BFA0AA',
+  tickGreen:      '#5BBF87',
+  crossRed:       '#F44336',
+  error:          '#E05555',
 };
 
 // ── Nav Icons (size default now 28) ──
@@ -90,17 +112,17 @@ const SPECIALTIES = [
 ];
 
 const DOCTORS = [
-  { id: 1, name: 'Dr. Elena Rodriguez', specialty: 'Senior Psychologist', category: 'therapist', tags: ['ANXIETY', 'CBT', '15+ YRS'], rating: 4.9, reviews: 108, status: 'online', liked: true, avatar: '👩‍⚕️', avatarBg: '#FFE0E6' },
-  { id: 2, name: 'Dr. Sarah Jenkins', specialty: 'Clinical Therapist', category: 'therapist', tags: ['MINDFULNESS', 'TRAUMA'], rating: 4.8, reviews: 85, status: 'busy', liked: false, avatar: '👩‍⚕️', avatarBg: '#E8F5E9' },
-  { id: 3, name: 'Dr. Maya Patel', specialty: 'Fertility Specialist', category: 'fertility', tags: ['IVF', 'HORMONAL'], rating: 5.0, reviews: 217, status: 'online', liked: false, avatar: '👩‍⚕️', avatarBg: '#FFF3E0' },
-  { id: 4, name: 'Dr. Priya Sharma', specialty: 'Gynecologist & Obstetrician', category: 'gynecologist', tags: ['PCOS', 'PRENATAL', '10+ YRS'], rating: 4.7, reviews: 312, status: 'online', liked: false, avatar: '👩‍⚕️', avatarBg: '#F3E5F5' },
-  { id: 5, name: 'Dr. Lisa Chen', specialty: "Women's Nutritionist", category: 'nutritionist', tags: ['PCOS DIET', 'HORMONES'], rating: 4.6, reviews: 94, status: 'online', liked: false, avatar: '👩‍⚕️', avatarBg: '#E3F2FD' },
+  { id: 1, name: 'Dr. Elena Rodriguez', specialty: 'Senior Psychologist', category: 'therapist', tags: ['ANXIETY', 'CBT', '15+ YRS'], rating: 4.9, reviews: 108, status: 'online', liked: true, avatar: 'person-circle', avatarBg: '#FFE0E6' },
+  { id: 2, name: 'Dr. Sarah Jenkins', specialty: 'Clinical Therapist', category: 'therapist', tags: ['MINDFULNESS', 'TRAUMA'], rating: 4.8, reviews: 85, status: 'busy', liked: false, avatar: 'person-circle', avatarBg: '#E8F5E9' },
+  { id: 3, name: 'Dr. Maya Patel', specialty: 'Fertility Specialist', category: 'fertility', tags: ['IVF', 'HORMONAL'], rating: 5.0, reviews: 217, status: 'online', liked: false, avatar: 'person-circle', avatarBg: '#FFF3E0' },
+  { id: 4, name: 'Dr. Priya Sharma', specialty: 'Gynecologist & Obstetrician', category: 'gynecologist', tags: ['PCOS', 'PRENATAL', '10+ YRS'], rating: 4.7, reviews: 312, status: 'online', liked: false, avatar: 'person-circle', avatarBg: '#F3E5F5' },
+  { id: 5, name: 'Dr. Lisa Chen', specialty: "Women's Nutritionist", category: 'nutritionist', tags: ['PCOS DIET', 'HORMONES'], rating: 4.6, reviews: 94, status: 'online', liked: false, avatar: 'person-circle', avatarBg: '#E3F2FD' },
 ];
 
 const StarRating = ({ rating }) => (
   <View style={styles.starRow}>
     {[1, 2, 3, 4, 5].map((s) => (
-      <Text key={s} style={[styles.star, s <= Math.round(rating) ? styles.starFilled : styles.starEmpty]}>★</Text>
+      <Ionicons key={s} name={s <= Math.round(rating) ? "star" : "star-outline"} size={13} color={s <= Math.round(rating) ? "#E8748A" : "#F5A8B8"} />
     ))}
     <Text style={styles.ratingNum}>{rating}</Text>
   </View>
@@ -146,7 +168,7 @@ export default function DoctorScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.lavenderBlush} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg || '#FDF0F3'} />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -167,9 +189,9 @@ export default function DoctorScreen({ navigation }) {
 
         {/* SEARCH */}
         <Animated.View style={[styles.searchWrapper, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }, searchFocused && styles.searchWrapperFocused]}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ico name='search' size={18} color={COLORS.mutedText} />
           <TextInput style={styles.searchInput} placeholder="Search doctors or specialties..." placeholderTextColor={COLORS.pastelPink} value={searchText} onChangeText={setSearchText} onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)} />
-          {searchText.length > 0 && <TouchableOpacity onPress={() => setSearchText('')}><Text style={styles.searchClear}>✕</Text></TouchableOpacity>}
+          {searchText.length > 0 && <TouchableOpacity onPress={() => setSearchText('')}><Ico name='close' size={16} color={COLORS.mutedText}/></TouchableOpacity>}
         </Animated.View>
 
         {/* SPECIALTY CHIPS */}
@@ -185,7 +207,7 @@ export default function DoctorScreen({ navigation }) {
 
         {/* NEARBY BANNER */}
         <Animated.View style={[styles.nearbyBanner, { opacity: fadeAnim }]}>
-          <Text style={styles.nearbyIcon}>📍</Text>
+          <Ico name='location' size={16} color={COLORS.watermelon} />
           <View style={styles.nearbyInfo}>
             <Text style={styles.nearbyTitle}>Find doctors near you</Text>
             <Text style={styles.nearbySubtitle}>Enable location for distance & availability</Text>
@@ -197,7 +219,7 @@ export default function DoctorScreen({ navigation }) {
 
         {/* SECTION TITLE */}
         <Animated.View style={[styles.sectionHeader, { opacity: fadeAnim }]}>
-          <Text style={styles.sectionTitle}>{showSaved ? '❤️ Saved Doctors' : 'Recommended Specialists'}</Text>
+          <Text style={styles.sectionTitle}>{showSaved ? 'Saved Doctors' : 'Recommended Specialists'}</Text>
           <Text style={styles.doctorCount}>{filteredDoctors.length} found</Text>
         </Animated.View>
 
@@ -205,7 +227,7 @@ export default function DoctorScreen({ navigation }) {
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
           {filteredDoctors.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>{showSaved ? '🤍' : '🔍'}</Text>
+              <Ico name={showSaved ? 'heart-outline' : 'search'} size={44} color={COLORS.pastelPink} />
               <Text style={styles.emptyText}>{showSaved ? 'No saved doctors' : 'No specialists found'}</Text>
               <Text style={styles.emptySubText}>{showSaved ? 'Tap the ♡ on any doctor to save them here' : 'Try a different search or category'}</Text>
             </View>
@@ -214,7 +236,7 @@ export default function DoctorScreen({ navigation }) {
               <TouchableOpacity key={doc.id} style={styles.doctorCard} activeOpacity={0.92}>
                 <View style={styles.cardTop}>
                   <View style={[styles.avatarWrapper, { backgroundColor: doc.avatarBg }]}>
-                    <Text style={styles.avatarEmoji}>{doc.avatar}</Text>
+                    <Ico name={doc.avatar} size={38} color={COLORS.watermelon} />
                     <View style={[styles.statusDot, { backgroundColor: doc.status === 'online' ? COLORS.online : COLORS.busy }]} />
                   </View>
                   <View style={styles.doctorInfo}>
@@ -246,7 +268,7 @@ export default function DoctorScreen({ navigation }) {
 
         {/* API NOTE */}
         <View style={styles.apiNote}>
-          <Text style={styles.apiNoteIcon}>🔗</Text>
+          <Ico name="link" size={16} color={COLORS.mutedText} />
           <Text style={styles.apiNoteText}>Real doctor data will load from Google Places API once connected by the backend team.</Text>
         </View>
 
@@ -273,37 +295,37 @@ export default function DoctorScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.lavenderBlush },
+  safeArea: { flex: 1, backgroundColor: COLORS.bg || '#FDF0F3' },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14 },
-  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: COLORS.pinkChampagne },
-  backArrow: { fontSize: 22, color: COLORS.watermelon, fontWeight: '700', lineHeight: 26 },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#FAD4DC' },
+  backArrow: { fontSize: 22, color: '#E8748A', fontWeight: '700', lineHeight: 26 },
   headerTitle: { fontSize: 17, fontWeight: '800', color: COLORS.darkText },
-  filterBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: COLORS.pinkChampagne },
-  filterBtnActive: { backgroundColor: COLORS.watermelon, borderColor: COLORS.watermelon },
+  filterBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#FAD4DC' },
+  filterBtnActive: { backgroundColor: COLORS.rose || '#E8748A', borderColor: COLORS.rose || '#E8748A' },
   filterIcon: { fontSize: 16 },
-  searchWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 16, borderWidth: 1.5, borderColor: COLORS.pastelPink, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 14, shadowColor: COLORS.lightPink, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 6, elevation: 2 },
-  searchWrapperFocused: { borderColor: COLORS.watermelon, shadowColor: COLORS.watermelon, shadowOpacity: 0.2 },
+  searchWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 16, borderWidth: 1.5, borderColor: '#F5A8B8', paddingHorizontal: 14, paddingVertical: 10, marginBottom: 14, shadowColor: '#D8808E', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 6, elevation: 2 },
+  searchWrapperFocused: { borderColor: '#E8748A', shadowColor: '#D06070', shadowOpacity: 0.2 },
   searchIcon: { fontSize: 16, marginRight: 8 },
   searchInput: { flex: 1, fontSize: 14, color: COLORS.darkText, fontWeight: '400' },
   searchClear: { fontSize: 14, color: COLORS.mutedText, paddingLeft: 8 },
   specialtyScroll: { marginBottom: 16 },
   specialtyContent: { paddingRight: 10, gap: 8 },
-  specialtyChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 50, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.pastelPink, marginRight: 8 },
-  specialtyChipActive: { backgroundColor: COLORS.watermelon, borderColor: COLORS.watermelon },
+  specialtyChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 50, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: '#F5A8B8', marginRight: 8 },
+  specialtyChipActive: { backgroundColor: COLORS.rose || '#E8748A', borderColor: COLORS.rose || '#E8748A' },
   specialtyText: { fontSize: 13, color: COLORS.darkText, fontWeight: '600' },
   specialtyTextActive: { color: COLORS.white, fontWeight: '700' },
-  nearbyBanner: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 16, padding: 14, marginBottom: 20, borderWidth: 1.5, borderColor: COLORS.pinkChampagne, gap: 10 },
+  nearbyBanner: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 16, padding: 14, marginBottom: 20, borderWidth: 1.5, borderColor: '#FAD4DC', gap: 10 },
   nearbyIcon: { fontSize: 20 },
   nearbyInfo: { flex: 1 },
   nearbyTitle: { fontSize: 13, fontWeight: '700', color: COLORS.darkText, marginBottom: 2 },
   nearbySubtitle: { fontSize: 11, color: COLORS.mutedText },
-  nearbyBtn: { backgroundColor: COLORS.lavenderBlush, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1.5, borderColor: COLORS.watermelon },
-  nearbyBtnText: { fontSize: 12, color: COLORS.watermelon, fontWeight: '700' },
+  nearbyBtn: { backgroundColor: '#FDE8ED', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1.5, borderColor: '#E8748A' },
+  nearbyBtnText: { fontSize: 12, color: '#E8748A', fontWeight: '700' },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   sectionTitle: { fontSize: 16, fontWeight: '800', color: COLORS.darkText },
   doctorCount: { fontSize: 12, color: COLORS.mutedText, fontWeight: '600' },
-  doctorCard: { backgroundColor: COLORS.white, borderRadius: 20, padding: 16, marginBottom: 14, borderWidth: 1.5, borderColor: COLORS.pastelPink, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 3 },
+  doctorCard: { backgroundColor: COLORS.white, borderRadius: 20, padding: 16, marginBottom: 14, borderWidth: 1.5, borderColor: '#F5A8B8', shadowColor: '#D06070', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 3 },
   cardTop: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14 },
   avatarWrapper: { width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', marginRight: 12, position: 'relative' },
   avatarEmoji: { fontSize: 32 },
@@ -312,10 +334,10 @@ const styles = StyleSheet.create({
   doctorName: { fontSize: 15, fontWeight: '800', color: COLORS.darkText, marginBottom: 3 },
   doctorSpecialty: { fontSize: 12, color: COLORS.mutedText, fontWeight: '500', marginBottom: 8 },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 5 },
-  tag: { backgroundColor: COLORS.lavenderBlush, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: COLORS.pinkChampagne },
-  tagText: { fontSize: 9, color: COLORS.watermelon, fontWeight: '700', letterSpacing: 0.5 },
-  likeBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.lavenderBlush, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: COLORS.pinkChampagne },
-  likeBtnActive: { backgroundColor: COLORS.watermelon, borderColor: COLORS.watermelon },
+  tag: { backgroundColor: '#FDE8ED', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: '#FAD4DC' },
+  tagText: { fontSize: 9, color: '#E8748A', fontWeight: '700', letterSpacing: 0.5 },
+  likeBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FDE8ED', alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#FAD4DC' },
+  likeBtnActive: { backgroundColor: COLORS.rose || '#E8748A', borderColor: COLORS.rose || '#E8748A' },
   likeIcon: { fontSize: 16, color: COLORS.pastelPink },
   likeIconActive: { color: COLORS.white },
   cardBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.lavenderBlush },
@@ -326,13 +348,13 @@ const styles = StyleSheet.create({
   starEmpty: { color: COLORS.pinkChampagne },
   ratingNum: { fontSize: 12, fontWeight: '700', color: COLORS.darkText, marginLeft: 4 },
   reviewCount: { fontSize: 11, color: COLORS.mutedText },
-  bookBtn: { backgroundColor: COLORS.watermelon, borderRadius: 22, paddingHorizontal: 16, paddingVertical: 9, shadowColor: COLORS.watermelon, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+  bookBtn: { backgroundColor: '#E8748A', borderRadius: 22, paddingHorizontal: 16, paddingVertical: 9, shadowColor: '#D06070', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
   bookBtnText: { color: COLORS.white, fontSize: 12, fontWeight: '700' },
   emptyState: { alignItems: 'center', paddingVertical: 40 },
   emptyIcon: { fontSize: 40, marginBottom: 12 },
   emptyText: { fontSize: 16, fontWeight: '700', color: COLORS.darkText, marginBottom: 6 },
   emptySubText: { fontSize: 13, color: COLORS.mutedText },
-  apiNote: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: COLORS.white, borderRadius: 14, padding: 12, marginTop: 8, borderWidth: 1.5, borderColor: COLORS.pinkChampagne, gap: 8 },
+  apiNote: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: COLORS.white, borderRadius: 14, padding: 12, marginTop: 8, borderWidth: 1.5, borderColor: '#FAD4DC', gap: 8 },
   apiNoteIcon: { fontSize: 14 },
   apiNoteText: { flex: 1, fontSize: 11, color: COLORS.mutedText, lineHeight: 16 },
 
@@ -368,7 +390,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 3,
     borderRadius: 2,
-    backgroundColor: COLORS.watermelon,
+    backgroundColor: '#E8748A',
   },
   navActiveCircle: {
     position: 'absolute',
@@ -376,7 +398,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.lavenderBlush,
+    backgroundColor: COLORS.roseCircle || '#FADADF',
     zIndex: -1,
   },
   navLabel: {
@@ -386,5 +408,5 @@ const styles = StyleSheet.create({
     marginTop: 1,
     letterSpacing: 0.2,
   },
-  navLabelActive: { color: COLORS.watermelon, fontWeight: '700' },
+  navLabelActive: { color: '#E8748A', fontWeight: '700' },
 });
