@@ -373,10 +373,8 @@ export default function CalendarScreen({ navigation }) {
 
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.menuBtn}>
-          <View style={styles.menuLine} />
-          <View style={[styles.menuLine, { width: 16 }]} />
-          <View style={styles.menuLine} />
+        <TouchableOpacity style={styles.menuBtn} onPress={() => navigation.navigate('Home')} activeOpacity={0.75}>
+          <Ico name="chevron-back" size={22} color={COLORS.darkText} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {MONTHS[currentMonth]} {currentYear} Calendar
@@ -769,8 +767,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
 
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14 },
-  menuBtn: { gap: 4, padding: 4 },
-  menuLine: { width: 22, height: 2.5, backgroundColor: COLORS.darkText, borderRadius: 2 },
+  menuBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: COLORS.pinkChampagne, shadowColor: '#D06070', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 2 },
   headerTitle: { fontSize: 13, fontWeight: '700', color: COLORS.darkText, flex: 1, textAlign: 'center', marginHorizontal: 8 },
   bellBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.white, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#FAD4DC' },
   bellDot: { position: 'absolute', top: 7, right: 7, width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#E8748A', borderWidth: 1, borderColor: COLORS.white },
