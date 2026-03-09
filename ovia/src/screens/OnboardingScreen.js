@@ -120,7 +120,7 @@ export default function OnboardingScreen({ navigation }) {
         setScrollValue(next.defaultValue || null);
       });
     } else {
-      navigation.replace('Home');
+      navigation.replace('Register');
     }
   };
 
