@@ -228,6 +228,3 @@ navigation.navigate('YourScreen');
 
 ---
 
-## 📄 License
-
-This is a private project. All rights reserved © 2025 Ovia Team.
